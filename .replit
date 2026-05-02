@@ -18,3 +18,20 @@ expertMode = true
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
+
+[[ports]]
+localPort = 8081
+externalPort = 80
+
+[[ports]]
+localPort = 18245
+externalPort = 3000
+
+[userenv]
+
+[userenv.shared]
+VITE_CLERK_PUBLISHABLE_KEY = "pk_test_dHJ1c3Rpbmctcm9kZW50LTg5LmNsZXJrLmFjY291bnRzLmRldiQ"

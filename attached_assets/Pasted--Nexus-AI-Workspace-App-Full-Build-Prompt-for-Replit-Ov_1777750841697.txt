@@ -1,0 +1,555 @@
+# Nexus — AI Workspace App
+## Full Build Prompt for Replit
+
+---
+
+## Overview
+
+Build a **full-stack AI-powered productivity workspace** called **Nexus** — a next-generation alternative to Notion, designed specifically for developers and students. The app works on **mobile and desktop** (fully responsive PWA). The AI does the heavy lifting — organizing, summarizing, connecting ideas, and guiding the user — so the user focuses only on thinking and creating.
+
+**Tagline**: *"Where ideas connect."*
+
+---
+
+## Tech Stack
+
+- **Frontend**: React 18 + TailwindCSS + Framer Motion
+- **Backend**: Node.js + Express
+- **Database**: MongoDB + Mongoose (primary database for all data)
+- **Vector Search**: MongoDB Atlas Vector Search (for AI memory/embeddings)
+- **AI**: Claude API (claude-sonnet-4-20250514) — streamed responses
+- **Auth**: JWT + bcrypt (stored in MongoDB users collection)
+- **Voice**: Web Speech API (browser built-in, Arabic + English)
+- **Real-time**: Socket.io (for collaboration and live updates)
+- **Mobile**: Fully responsive PWA (installable on iOS and Android)
+
+### MongoDB Collections Structure
+```
+users           → { name, email, password, preferences, streaks, createdAt }
+workspaces      → { userId, name, icon, color, structure, createdAt }
+pages           → { workspaceId, userId, title, content, tags, priority, updatedAt }
+tasks           → { workspaceId, userId, title, status, deadline, priority, aiPriority }
+memories        → { userId, content, embedding, sourceId, sourceType, createdAt }
+snippets        → { userId, language, code, description, tags }
+sessions        → { userId, duration, focusScore, tasksCompleted, date }
+notifications   → { userId, type, message, read, createdAt }
+```
+
+---
+
+## Design System
+
+### Philosophy
+Nexus feels like a **premium tool used by the world's best engineers** — not a startup side project. Every pixel is intentional. The UI is confident, refined, and timeless.
+
+Two modes — both equally polished:
+
+---
+
+### Dark Mode (Default)
+Deep blacks with warm undertones. Feels like coding at 2am in a luxury setup.
+
+```css
+--bg-primary:     #0C0C0E;   /* near black, warm undertone */
+--bg-secondary:   #141416;   /* card surfaces */
+--bg-tertiary:    #1C1C1F;   /* hover states, inputs */
+--bg-elevated:    #242428;   /* modals, popovers */
+
+--accent:         #E8D5A3;   /* warm gold — the signature color */
+--accent-dim:     #C4A96B;   /* darker gold for borders */
+--accent-glow:    rgba(232, 213, 163, 0.12); /* subtle glow */
+
+--teal:           #4ECDC4;   /* secondary accent — actions, links */
+--teal-dim:       #2AA39A;
+
+--text-primary:   #F2EFE8;   /* warm white */
+--text-secondary: #8A8680;   /* muted */
+--text-tertiary:  #4A4845;   /* very muted */
+
+--border:         rgba(242, 239, 232, 0.06);
+--border-strong:  rgba(242, 239, 232, 0.12);
+
+--success:        #4ADE80;
+--warning:        #FBBF24;
+--danger:         #F87171;
+```
+
+---
+
+### Light Mode
+Warm cream paper. Feels like a beautifully designed journal.
+
+```css
+--bg-primary:     #FAF8F4;   /* warm cream */
+--bg-secondary:   #F2EFE8;   /* slightly darker cream */
+--bg-tertiary:    #E8E4D8;   /* card hover */
+--bg-elevated:    #FFFFFF;   /* modals */
+
+--accent:         #8B6914;   /* deep gold */
+--accent-dim:     #6B4F0E;
+--accent-glow:    rgba(139, 105, 20, 0.08);
+
+--teal:           #0F766E;   /* deep teal */
+--teal-dim:       #0D5E57;
+
+--text-primary:   #1A1815;   /* near black warm */
+--text-secondary: #6B6560;
+--text-tertiary:  #A8A39C;
+
+--border:         rgba(26, 24, 21, 0.08);
+--border-strong:  rgba(26, 24, 21, 0.16);
+
+--success:        #16A34A;
+--warning:        #D97706;
+--danger:         #DC2626;
+```
+
+---
+
+### Typography
+
+**Display / Headings**: `Cormorant Garamond` (Google Fonts)
+- Elegant, high-contrast serif — gives Nexus a premium editorial feel
+- Used for: app name logo, page titles, hero text, section headers
+- Weight: 600 for titles, 700 for display
+
+**Body / UI**: `DM Sans` (Google Fonts)
+- Modern, geometric sans-serif — clean and readable at any size
+- Used for: all UI text, labels, descriptions, buttons, inputs
+- Weight: 400 regular, 500 medium
+
+**Code**: `JetBrains Mono` (Google Fonts)
+- The best monospace font for developers
+- Used for: code blocks, code snippets, terminal-style elements
+- Weight: 400 regular, 500 medium
+
+```html
+<!-- Add to index.html -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+```
+
+```css
+/* CSS Variables */
+--font-display: 'Cormorant Garamond', Georgia, serif;
+--font-body:    'DM Sans', system-ui, sans-serif;
+--font-mono:    'JetBrains Mono', 'Courier New', monospace;
+
+/* Type Scale */
+--text-xs:   11px;
+--text-sm:   13px;
+--text-base: 15px;
+--text-lg:   17px;
+--text-xl:   20px;
+--text-2xl:  26px;
+--text-3xl:  34px;
+--text-4xl:  46px;
+
+/* Line heights */
+--leading-tight:  1.2;
+--leading-normal: 1.6;
+--leading-loose:  1.8;
+```
+
+---
+
+### Spacing & Layout
+```css
+--radius-sm:  6px;
+--radius-md:  10px;
+--radius-lg:  16px;
+--radius-xl:  24px;
+--radius-full: 9999px;
+
+--shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+--shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+--shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+--shadow-accent: 0 0 24px rgba(232, 213, 163, 0.15);
+```
+
+---
+
+### Motion & Animation
+```css
+/* Timing functions */
+--ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+/* Durations */
+--duration-fast:   120ms;
+--duration-normal: 220ms;
+--duration-slow:   400ms;
+
+/* Page transitions: fade + slight upward slide */
+/* Card hover: scale(1.01) + border brightens */
+/* Button press: scale(0.97) */
+/* Sidebar items: staggered fade-in on load */
+/* AI response: typewriter stream effect */
+```
+
+---
+
+### UI Components Style Guide
+
+**Cards**
+```css
+background: var(--bg-secondary);
+border: 1px solid var(--border);
+border-radius: var(--radius-lg);
+padding: 20px 24px;
+transition: border-color 220ms, transform 220ms;
+
+/* Hover */
+border-color: var(--border-strong);
+transform: translateY(-1px);
+```
+
+**Buttons — Primary**
+```css
+background: var(--accent);
+color: var(--bg-primary);
+font-family: var(--font-body);
+font-weight: 500;
+font-size: 13px;
+padding: 9px 18px;
+border-radius: var(--radius-md);
+border: none;
+letter-spacing: 0.02em;
+```
+
+**Buttons — Secondary**
+```css
+background: transparent;
+color: var(--text-primary);
+border: 1px solid var(--border-strong);
+/* same padding and radius */
+
+/* Hover: background becomes var(--bg-tertiary) */
+```
+
+**Inputs**
+```css
+background: var(--bg-tertiary);
+border: 1px solid var(--border);
+border-radius: var(--radius-md);
+color: var(--text-primary);
+font-family: var(--font-body);
+font-size: 14px;
+padding: 10px 14px;
+outline: none;
+
+/* Focus: border-color becomes var(--accent-dim) */
+```
+
+**Sidebar**
+```css
+width: 260px;
+background: var(--bg-secondary);
+border-right: 1px solid var(--border);
+height: 100vh;
+/* Items have 36px height, 8px border-radius, subtle hover */
+/* Active item: accent background at 10% opacity, accent text */
+```
+
+**The Nexus Logo**
+```
+Font: Cormorant Garamond Bold
+Letter-spacing: 0.08em
+Color: var(--accent)
+Size: 22px
+Optionally add a small geometric diamond shape before the text ◆
+```
+
+---
+
+## Core Features
+
+### 1. Daily Cockpit (Home Dashboard)
+The first screen every day. AI generates it automatically.
+
+- Personalized greeting from **Nex** (the AI assistant) based on time and user name
+- **Today's 3 priorities**: AI picks from all workspaces
+- **Quick stats row**: Tasks done this week / Notes written / Streak days / Flow Score
+- **AI Insight card**: One smart observation with a suggested action
+- **Quick capture bar**: Type or speak — AI decides where to put it
+- **Recent activity**: Last 5 edited pages
+
+---
+
+### 2. AI Second Brain (Memory Layer)
+Every note is embedded and stored in MongoDB Atlas Vector Search.
+
+- Natural language search: *"show me everything about my graduation project"*
+- **Auto-connections**: AI links related notes automatically
+- **Knowledge graph**: Visual interactive map of all connected notes (D3.js)
+- **Ask Nex**: Chat interface — AI answers from the user's own notes
+
+---
+
+### 3. Smart Workspaces
+Each workspace = a project room.
+
+- AI suggests optimal structure when workspace is created
+- Inside each workspace:
+  - **Pages** (rich text editor — TipTap or Quill)
+  - **Kanban board** (To Do / In Progress / Done)
+  - **Calendar** (deadline tracking)
+  - **AI Chat** (context-aware to this workspace)
+
+---
+
+### 4. Auto-Organization Engine
+User drops anything anywhere — AI handles the rest.
+
+- AI detects content type and suggests the right workspace
+- **Auto-tagging** and **auto-priority** (High / Medium / Low)
+- **Duplicate detector**: warns if similar content exists
+
+---
+
+### 5. Focus Mode
+Full-screen, distraction-free environment.
+
+- Pomodoro timer (25min / 5min)
+- Ambient sounds (lofi / rain / white noise)
+- AI suggests what to work on
+- Session summary when timer ends
+
+---
+
+### 6. Voice-to-Structure
+- Arabic + English (code-switching supported)
+- AI transcribes and structures automatically:
+  - Task → adds to task list
+  - Idea → creates a note
+  - Question → AI answers
+  - Reminder → sets deadline
+
+---
+
+### 7. Developer Mode
+- Code editor with syntax highlighting (50+ languages via Prism.js)
+- **AI code explainer**: paste code → line-by-line explanation in sidebar
+- **Bug journal**: log bugs, AI suggests fixes based on history
+- **Snippet library**: saved code with AI-generated descriptions
+- GitHub integration (optional)
+
+---
+
+### 8. Smart Deadlines & Planning
+- AI warns when schedule is unrealistic
+- **Auto-schedule**: distributes tasks across days
+- **Weekly review** (every Sunday): AI report on progress
+- **Streak tracking**: daily usage streak with visual indicator
+
+---
+
+### 9. Collaboration
+- Share workspace with teammates
+- `@Nex` in comments to trigger AI
+- Export: PDF / Markdown / shareable link
+
+---
+
+### 10. Mood & Flow Score
+- Daily **Flow Score** (0–100): tasks completed + focus time + notes written
+- Shown as animated ring on dashboard
+- Weekly mood chart based on activity patterns
+- Celebration animation on big achievements
+
+---
+
+## AI Assistant: Nex
+
+### Personality
+- **Name**: Nex (short for Nexus)
+- **Tone**: Intelligent, warm, occasionally witty — never robotic or corporate
+- **Language**: Responds in whatever language the user uses (Arabic/English/mixed)
+- **Never says**: "I can't do that" — always finds an alternative
+
+### Entry Points
+1. **CMD+K** (desktop) / FAB button (mobile): Quick Ask anything
+2. **Text selection**: highlight text → AI options appear (summarize / rewrite / explain)
+3. **Right sidebar panel** (desktop): context-aware for current page
+4. **Voice button**: anywhere in app
+5. **Daily briefing**: morning notification with AI summary
+
+### System Prompt for Nex
+```
+You are Nex, the AI assistant inside Nexus — a premium productivity workspace for developers and students.
+
+Your personality:
+- Intelligent, warm, and occasionally witty
+- You speak the user's language (Arabic or English — detect automatically)
+- You are proactive but never annoying
+- You never say "I can't" — you always find a way
+
+Your capabilities:
+- Access to all user notes, tasks, and workspaces from MongoDB
+- Create, edit, organize content
+- Answer questions from the user's own knowledge base
+- Plan, remind, and suggest
+
+Rules:
+- Be concise — no long paragraphs unless specifically asked
+- Use bullet points for lists
+- If user writes in Arabic, respond in Arabic (Egyptian dialect is fine)
+- Celebrate wins, no matter how small
+- When uncertain, ask ONE clarifying question — never multiple
+- When generating content, stream it word by word (use streaming API)
+```
+
+---
+
+## Unique Features (Not in Notion or Any Competitor)
+
+1. **Arabic-first AI**: Full Arabic support, RTL layout toggle, Egyptian dialect responses
+2. **Idea Graveyard**: Saved "dead" ideas — AI revisits them monthly: *"Is it time for this?"*
+3. **Anti-procrastination mode**: Detects idle browsing, gently nudges back to work
+4. **Learning mode**: Paste PDF/URL → AI creates flashcards + summary + study questions
+5. **Flow Score ring**: Beautiful animated productivity score shown daily
+6. **Context-aware switching**: AI detects from typing which project it belongs to
+7. **Project Risk Detector**: AI scans workspace and flags risks proactively
+8. **Reading list**: Save URLs, AI summarizes and adds key points to Second Brain
+
+---
+
+## App Routes
+
+```
+/                         → Landing page (animated hero)
+/login                    → Login / Signup
+/app                      → Daily Cockpit
+/app/brain                → AI Second Brain + Knowledge Graph
+/app/workspace/:id        → Workspace view
+/app/workspace/:id/page/:pageId  → Page editor
+/app/focus                → Focus mode
+/app/snippets             → Code snippet library
+/app/review               → Weekly review report
+/app/settings             → Settings
+```
+
+---
+
+## Onboarding Flow
+
+1. **Landing page**: Animated hero — *"Where ideas connect."* with particle background
+2. **Sign up**: Email or Google → stored in MongoDB users collection
+3. **3-step setup**:
+   - Purpose: Study / Development / Work / Personal
+   - First workspace name (AI creates structure automatically)
+   - Language preference: Arabic / English / Both
+4. **Welcome**: Nex sends a personalized welcome note inside first workspace
+5. **Guided tour**: 5-step interactive tooltip tour
+
+---
+
+## Performance
+
+- First load: < 2 seconds
+- AI responses: streamed word-by-word (never wait for full response)
+- PWA: offline read/write, sync when back online
+- MongoDB indexes on: userId, workspaceId, createdAt, tags
+
+---
+
+## Project File Structure
+
+```
+nexus/
+├── client/
+│   ├── public/
+│   │   └── manifest.json        ← PWA manifest
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── layout/
+│   │   │   │   ├── Sidebar.jsx
+│   │   │   │   ├── TopBar.jsx
+│   │   │   │   └── MobileNav.jsx
+│   │   │   ├── editor/
+│   │   │   │   ├── RichEditor.jsx
+│   │   │   │   └── CodeBlock.jsx
+│   │   │   ├── ai/
+│   │   │   │   ├── NexPanel.jsx
+│   │   │   │   ├── VoiceInput.jsx
+│   │   │   │   └── QuickAsk.jsx
+│   │   │   ├── dashboard/
+│   │   │   │   ├── Cockpit.jsx
+│   │   │   │   ├── FlowScore.jsx
+│   │   │   │   └── AIInsight.jsx
+│   │   │   └── ui/
+│   │   │       ├── Button.jsx
+│   │   │       ├── Card.jsx
+│   │   │       ├── Modal.jsx
+│   │   │       └── Toast.jsx
+│   │   ├── pages/
+│   │   │   ├── Landing.jsx
+│   │   │   ├── Login.jsx
+│   │   │   ├── Cockpit.jsx
+│   │   │   ├── Brain.jsx
+│   │   │   ├── Workspace.jsx
+│   │   │   ├── PageEditor.jsx
+│   │   │   ├── Focus.jsx
+│   │   │   └── Settings.jsx
+│   │   ├── hooks/
+│   │   │   ├── useAI.js
+│   │   │   ├── useVoice.js
+│   │   │   └── useWorkspace.js
+│   │   ├── store/
+│   │   │   └── index.js         ← Zustand store
+│   │   ├── lib/
+│   │   │   ├── api.js
+│   │   │   ├── ai.js
+│   │   │   └── utils.js
+│   │   ├── styles/
+│   │   │   └── globals.css      ← CSS variables + base styles
+│   │   └── App.jsx
+├── server/
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Workspace.js
+│   │   ├── Page.js
+│   │   ├── Task.js
+│   │   ├── Memory.js
+│   │   └── Snippet.js
+│   ├── routes/
+│   │   ├── auth.js
+│   │   ├── workspaces.js
+│   │   ├── pages.js
+│   │   ├── tasks.js
+│   │   └── ai.js
+│   ├── controllers/
+│   ├── middleware/
+│   │   └── auth.js              ← JWT verification
+│   ├── ai/
+│   │   ├── nex.js               ← Nex AI logic
+│   │   ├── embeddings.js        ← Vector embeddings
+│   │   └── prompts.js           ← All system prompts
+│   └── server.js
+├── .env
+└── README.md
+```
+
+---
+
+## Environment Variables (.env)
+
+```
+# MongoDB
+MONGODB_URI=mongodb+srv://...
+
+# AI
+ANTHROPIC_API_KEY=...
+
+# Auth
+JWT_SECRET=...
+JWT_EXPIRES_IN=7d
+
+# Server
+PORT=5000
+CLIENT_URL=http://localhost:3000
+```
+
+---
+
+*Nexus — Where ideas connect.*
