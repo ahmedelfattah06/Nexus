@@ -32,19 +32,32 @@ lib/
 
 ## Design System
 
-- **Fonts**: Cormorant Garamond (serif headings) + DM Sans (body)
+- **Fonts**: Inter (EN body), Cairo (AR body), Cormorant Garamond (EN serif headings)
 - **Colors**: Warm gold `#D4890A` (primary), teal accent, cream background
 - **Modes**: Dark/light toggle (CSS variables via `data-theme`)
+- **i18n**: Full Arabic/English with RTL layout switching (`LanguageContext`, `localStorage`)
 
 ## Features
 
-- **Daily Cockpit** — dashboard with stats, streaks, recent activity
+### Core
+- **Daily Cockpit** — dashboard with stats, streaks, daily AI quote, quick links
 - **Workspaces** — organize notes by project/topic
 - **Pages Editor** — rich text notes within workspaces
 - **Kanban Tasks** — per-workspace task boards with status columns
 - **Code Snippets** — personal snippet library with language filter
 - **Focus Mode** — Pomodoro timer with session recording
 - **Nex AI** — Claude-powered chat assistant with streaming SSE
+
+### Productivity (New)
+- **Habit Tracker** — daily check-in, streaks, color/icon customization
+- **Goals** — title/description/date/progress/status tracking
+- **Mood Tracker** — 1–5 scale with notes and history
+- **Analytics** — weekly focus bar chart, session stats
+
+### Knowledge (New)
+- **Bookmarks** — save links with tags, favicon display, search
+- **Reading List** — want-to-read/reading/completed with progress slider
+- **Flashcards** — sets with card flip study mode
 
 ## Key Schema Facts (ground truth for API/frontend)
 

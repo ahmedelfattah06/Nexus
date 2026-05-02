@@ -257,3 +257,155 @@ export interface AnthropicConversationWithMessages {
 export interface AnthropicError {
   error: string;
 }
+
+export interface Habit {
+  id: number;
+  userId: string;
+  name: string;
+  icon: string;
+  color: string;
+  createdAt: string;
+}
+
+export interface CreateHabitBody {
+  name: string;
+  icon?: string;
+  color?: string;
+}
+
+export interface HabitLog {
+  id: number;
+  habitId: number;
+  userId: string;
+  date: string;
+  completed: boolean;
+  createdAt: string;
+}
+
+export interface LogHabitBody {
+  date: string;
+  completed: boolean;
+}
+
+export interface Bookmark {
+  id: number;
+  userId: string;
+  title: string;
+  url: string;
+  description: string;
+  tags?: string[];
+  createdAt: string;
+}
+
+export interface CreateBookmarkBody {
+  title: string;
+  url: string;
+  description?: string;
+  tags?: string[];
+}
+
+export interface ReadingItem {
+  id: number;
+  userId: string;
+  title: string;
+  author: string;
+  url: string;
+  status: string;
+  progress: number;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateReadingItemBody {
+  title: string;
+  author?: string;
+  url?: string;
+  status?: string;
+  progress?: number;
+  notes?: string;
+}
+
+export interface UpdateReadingItemBody {
+  title?: string;
+  author?: string;
+  url?: string;
+  status?: string;
+  progress?: number;
+  notes?: string;
+}
+
+export interface FlashcardSet {
+  id: number;
+  userId: string;
+  title: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface CreateFlashcardSetBody {
+  title: string;
+  description?: string;
+}
+
+export interface Flashcard {
+  id: number;
+  setId: number;
+  userId: string;
+  front: string;
+  back: string;
+  createdAt: string;
+}
+
+export interface CreateFlashcardBody {
+  front: string;
+  back: string;
+}
+
+export interface MoodEntry {
+  id: number;
+  userId: string;
+  mood: number;
+  note: string;
+  date: string;
+  createdAt: string;
+}
+
+export interface CreateMoodBody {
+  mood: number;
+  note?: string;
+  date: string;
+}
+
+export interface Goal {
+  id: number;
+  userId: string;
+  title: string;
+  description: string;
+  targetDate: string;
+  progress: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateGoalBody {
+  title: string;
+  description?: string;
+  targetDate?: string;
+  progress?: number;
+  status?: string;
+}
+
+export interface UpdateGoalBody {
+  title?: string;
+  description?: string;
+  targetDate?: string;
+  progress?: number;
+  status?: string;
+}
+
+export interface DailyQuote {
+  quote: string;
+  author: string;
+}

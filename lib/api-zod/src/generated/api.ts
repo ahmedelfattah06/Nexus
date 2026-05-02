@@ -440,3 +440,311 @@ export const SendAnthropicMessageParams = zod.object({
 export const SendAnthropicMessageBody = zod.object({
   content: zod.string(),
 });
+
+/**
+ * @summary List all habits for the user
+ */
+export const ListHabitsResponseItem = zod.object({
+  id: zod.number(),
+  userId: zod.string(),
+  name: zod.string(),
+  icon: zod.string(),
+  color: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const ListHabitsResponse = zod.array(ListHabitsResponseItem);
+
+/**
+ * @summary Create a new habit
+ */
+export const CreateHabitBody = zod.object({
+  name: zod.string(),
+  icon: zod.string().optional(),
+  color: zod.string().optional(),
+});
+
+/**
+ * @summary Get today's habit completion logs
+ */
+export const GetTodayHabitLogsResponseItem = zod.object({
+  id: zod.number(),
+  habitId: zod.number(),
+  userId: zod.string(),
+  date: zod.string(),
+  completed: zod.boolean(),
+  createdAt: zod.coerce.date(),
+});
+export const GetTodayHabitLogsResponse = zod.array(
+  GetTodayHabitLogsResponseItem,
+);
+
+/**
+ * @summary Delete a habit
+ */
+export const DeleteHabitParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Log habit completion for today
+ */
+export const LogHabitParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const LogHabitBody = zod.object({
+  date: zod.string(),
+  completed: zod.boolean(),
+});
+
+/**
+ * @summary List all bookmarks
+ */
+export const ListBookmarksResponseItem = zod.object({
+  id: zod.number(),
+  userId: zod.string(),
+  title: zod.string(),
+  url: zod.string(),
+  description: zod.string(),
+  tags: zod.array(zod.string()).optional(),
+  createdAt: zod.coerce.date(),
+});
+export const ListBookmarksResponse = zod.array(ListBookmarksResponseItem);
+
+/**
+ * @summary Create a new bookmark
+ */
+export const CreateBookmarkBody = zod.object({
+  title: zod.string(),
+  url: zod.string(),
+  description: zod.string().optional(),
+  tags: zod.array(zod.string()).optional(),
+});
+
+/**
+ * @summary Delete a bookmark
+ */
+export const DeleteBookmarkParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary List all reading items
+ */
+export const ListReadingItemsResponseItem = zod.object({
+  id: zod.number(),
+  userId: zod.string(),
+  title: zod.string(),
+  author: zod.string(),
+  url: zod.string(),
+  status: zod.string(),
+  progress: zod.number(),
+  notes: zod.string(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+export const ListReadingItemsResponse = zod.array(ListReadingItemsResponseItem);
+
+/**
+ * @summary Add a reading item
+ */
+export const CreateReadingItemBody = zod.object({
+  title: zod.string(),
+  author: zod.string().optional(),
+  url: zod.string().optional(),
+  status: zod.string().optional(),
+  progress: zod.number().optional(),
+  notes: zod.string().optional(),
+});
+
+/**
+ * @summary Update a reading item
+ */
+export const UpdateReadingItemParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateReadingItemBody = zod.object({
+  title: zod.string().optional(),
+  author: zod.string().optional(),
+  url: zod.string().optional(),
+  status: zod.string().optional(),
+  progress: zod.number().optional(),
+  notes: zod.string().optional(),
+});
+
+export const UpdateReadingItemResponse = zod.object({
+  id: zod.number(),
+  userId: zod.string(),
+  title: zod.string(),
+  author: zod.string(),
+  url: zod.string(),
+  status: zod.string(),
+  progress: zod.number(),
+  notes: zod.string(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete a reading item
+ */
+export const DeleteReadingItemParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary List all flashcard sets
+ */
+export const ListFlashcardSetsResponseItem = zod.object({
+  id: zod.number(),
+  userId: zod.string(),
+  title: zod.string(),
+  description: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const ListFlashcardSetsResponse = zod.array(
+  ListFlashcardSetsResponseItem,
+);
+
+/**
+ * @summary Create a flashcard set
+ */
+export const CreateFlashcardSetBody = zod.object({
+  title: zod.string(),
+  description: zod.string().optional(),
+});
+
+/**
+ * @summary Delete a flashcard set
+ */
+export const DeleteFlashcardSetParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary List flashcards in a set
+ */
+export const ListFlashcardsParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ListFlashcardsResponseItem = zod.object({
+  id: zod.number(),
+  setId: zod.number(),
+  userId: zod.string(),
+  front: zod.string(),
+  back: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const ListFlashcardsResponse = zod.array(ListFlashcardsResponseItem);
+
+/**
+ * @summary Add a flashcard to a set
+ */
+export const CreateFlashcardParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const CreateFlashcardBody = zod.object({
+  front: zod.string(),
+  back: zod.string(),
+});
+
+/**
+ * @summary Delete a flashcard
+ */
+export const DeleteFlashcardParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary List mood entries
+ */
+export const ListMoodsResponseItem = zod.object({
+  id: zod.number(),
+  userId: zod.string(),
+  mood: zod.number(),
+  note: zod.string(),
+  date: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const ListMoodsResponse = zod.array(ListMoodsResponseItem);
+
+/**
+ * @summary Log a mood entry
+ */
+export const CreateMoodBody = zod.object({
+  mood: zod.number(),
+  note: zod.string().optional(),
+  date: zod.string(),
+});
+
+/**
+ * @summary List all goals
+ */
+export const ListGoalsResponseItem = zod.object({
+  id: zod.number(),
+  userId: zod.string(),
+  title: zod.string(),
+  description: zod.string(),
+  targetDate: zod.string(),
+  progress: zod.number(),
+  status: zod.string(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+export const ListGoalsResponse = zod.array(ListGoalsResponseItem);
+
+/**
+ * @summary Create a goal
+ */
+export const CreateGoalBody = zod.object({
+  title: zod.string(),
+  description: zod.string().optional(),
+  targetDate: zod.string().optional(),
+  progress: zod.number().optional(),
+  status: zod.string().optional(),
+});
+
+/**
+ * @summary Update a goal
+ */
+export const UpdateGoalParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateGoalBody = zod.object({
+  title: zod.string().optional(),
+  description: zod.string().optional(),
+  targetDate: zod.string().optional(),
+  progress: zod.number().optional(),
+  status: zod.string().optional(),
+});
+
+export const UpdateGoalResponse = zod.object({
+  id: zod.number(),
+  userId: zod.string(),
+  title: zod.string(),
+  description: zod.string(),
+  targetDate: zod.string(),
+  progress: zod.number(),
+  status: zod.string(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete a goal
+ */
+export const DeleteGoalParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Get an AI-generated daily motivational quote
+ */
+export const GetDailyQuoteResponse = zod.object({
+  quote: zod.string(),
+  author: zod.string(),
+});

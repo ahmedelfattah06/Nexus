@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Cairo:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -73,7 +73,7 @@
 
 :root {
   --radius: 0.625rem;
-  --app-font-sans: 'DM Sans', system-ui, sans-serif;
+  --app-font-sans: 'Inter', system-ui, sans-serif;
   --app-font-serif: 'Cormorant Garamond', Georgia, serif;
   --app-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
@@ -194,12 +194,74 @@ body {
   font-family: var(--app-font-sans);
   font-feature-settings: "rlig" 1, "calt" 1;
   -webkit-font-smoothing: antialiased;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 h1, h2, h3 {
   font-family: var(--app-font-serif);
   font-weight: 500;
   letter-spacing: -0.01em;
+}
+
+/* Arabic / RTL support */
+html[lang="ar"] body,
+html.rtl body {
+  font-family: 'Cairo', system-ui, sans-serif;
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] h3,
+html.rtl h1,
+html.rtl h2,
+html.rtl h3 {
+  font-family: 'Cairo', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+html[lang="ar"] .font-serif,
+html.rtl .font-serif {
+  font-family: 'Cairo', system-ui, sans-serif;
+}
+
+/* RTL sidebar — flip from left to right */
+html[dir="rtl"] aside {
+  left: auto;
+  right: 0;
+  border-right: none;
+  border-left: 1px solid hsl(var(--sidebar-border));
+}
+
+html[dir="rtl"] aside.fixed {
+  transform: translateX(100%);
+}
+
+html[dir="rtl"] aside.fixed.translate-x-0 {
+  transform: translateX(0);
+}
+
+/* RTL margin/padding utilities */
+html[dir="rtl"] .ml-auto { margin-left: unset; margin-right: auto; }
+html[dir="rtl"] .mr-auto { margin-right: unset; margin-left: auto; }
+
+/* Better scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
 }
 
 .font-serif {

@@ -14,6 +14,13 @@ import TasksPage from "@/pages/tasks";
 import SnippetsPage from "@/pages/snippets";
 import FocusPage from "@/pages/focus";
 import NexPage from "@/pages/nex";
+import HabitsPage from "@/pages/habits";
+import BookmarksPage from "@/pages/bookmarks";
+import ReadingPage from "@/pages/reading";
+import FlashcardsPage from "@/pages/flashcards";
+import GoalsPage from "@/pages/goals";
+import MoodPage from "@/pages/mood";
+import AnalyticsPage from "@/pages/analytics";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -143,6 +150,13 @@ function AppRouter() {
       <Route path="/snippets" component={() => <ProtectedRoute><SnippetsPage /></ProtectedRoute>} />
       <Route path="/focus" component={() => <ProtectedRoute><FocusPage /></ProtectedRoute>} />
       <Route path="/nex" component={() => <ProtectedRoute><NexPage /></ProtectedRoute>} />
+      <Route path="/habits" component={() => <ProtectedRoute><HabitsPage /></ProtectedRoute>} />
+      <Route path="/bookmarks" component={() => <ProtectedRoute><BookmarksPage /></ProtectedRoute>} />
+      <Route path="/reading" component={() => <ProtectedRoute><ReadingPage /></ProtectedRoute>} />
+      <Route path="/flashcards" component={() => <ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
+      <Route path="/goals" component={() => <ProtectedRoute><GoalsPage /></ProtectedRoute>} />
+      <Route path="/mood" component={() => <ProtectedRoute><MoodPage /></ProtectedRoute>} />
+      <Route path="/analytics" component={() => <ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
       <Route component={NotFound} />
     </Switch>
   );

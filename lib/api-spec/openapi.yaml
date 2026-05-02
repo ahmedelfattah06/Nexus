@@ -602,6 +602,438 @@ paths:
           content:
             text/event-stream: {}
 
+  # Habits
+  /habits:
+    get:
+      operationId: listHabits
+      tags: [habits]
+      summary: List all habits for the user
+      responses:
+        "200":
+          description: List of habits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Habit"
+    post:
+      operationId: createHabit
+      tags: [habits]
+      summary: Create a new habit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateHabitBody"
+      responses:
+        "201":
+          description: Created habit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Habit"
+
+  /habits/today-logs:
+    get:
+      operationId: getTodayHabitLogs
+      tags: [habits]
+      summary: Get today's habit completion logs
+      responses:
+        "200":
+          description: Today's logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HabitLog"
+
+  /habits/{id}:
+    delete:
+      operationId: deleteHabit
+      tags: [habits]
+      summary: Delete a habit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /habits/{id}/log:
+    post:
+      operationId: logHabit
+      tags: [habits]
+      summary: Log habit completion for today
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogHabitBody"
+      responses:
+        "201":
+          description: Logged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HabitLog"
+
+  # Bookmarks
+  /bookmarks:
+    get:
+      operationId: listBookmarks
+      tags: [bookmarks]
+      summary: List all bookmarks
+      responses:
+        "200":
+          description: List of bookmarks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bookmark"
+    post:
+      operationId: createBookmark
+      tags: [bookmarks]
+      summary: Create a new bookmark
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookmarkBody"
+      responses:
+        "201":
+          description: Created bookmark
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bookmark"
+
+  /bookmarks/{id}:
+    delete:
+      operationId: deleteBookmark
+      tags: [bookmarks]
+      summary: Delete a bookmark
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Reading List
+  /reading:
+    get:
+      operationId: listReadingItems
+      tags: [reading]
+      summary: List all reading items
+      responses:
+        "200":
+          description: List of reading items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReadingItem"
+    post:
+      operationId: createReadingItem
+      tags: [reading]
+      summary: Add a reading item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReadingItemBody"
+      responses:
+        "201":
+          description: Created reading item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadingItem"
+
+  /reading/{id}:
+    put:
+      operationId: updateReadingItem
+      tags: [reading]
+      summary: Update a reading item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReadingItemBody"
+      responses:
+        "200":
+          description: Updated reading item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadingItem"
+    delete:
+      operationId: deleteReadingItem
+      tags: [reading]
+      summary: Delete a reading item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Flashcard Sets
+  /flashcard-sets:
+    get:
+      operationId: listFlashcardSets
+      tags: [flashcards]
+      summary: List all flashcard sets
+      responses:
+        "200":
+          description: List of flashcard sets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FlashcardSet"
+    post:
+      operationId: createFlashcardSet
+      tags: [flashcards]
+      summary: Create a flashcard set
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFlashcardSetBody"
+      responses:
+        "201":
+          description: Created flashcard set
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FlashcardSet"
+
+  /flashcard-sets/{id}:
+    delete:
+      operationId: deleteFlashcardSet
+      tags: [flashcards]
+      summary: Delete a flashcard set
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /flashcard-sets/{id}/cards:
+    get:
+      operationId: listFlashcards
+      tags: [flashcards]
+      summary: List flashcards in a set
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of flashcards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Flashcard"
+    post:
+      operationId: createFlashcard
+      tags: [flashcards]
+      summary: Add a flashcard to a set
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFlashcardBody"
+      responses:
+        "201":
+          description: Created flashcard
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Flashcard"
+
+  /flashcards/{id}:
+    delete:
+      operationId: deleteFlashcard
+      tags: [flashcards]
+      summary: Delete a flashcard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Moods
+  /moods:
+    get:
+      operationId: listMoods
+      tags: [moods]
+      summary: List mood entries
+      responses:
+        "200":
+          description: List of mood entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MoodEntry"
+    post:
+      operationId: createMood
+      tags: [moods]
+      summary: Log a mood entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMoodBody"
+      responses:
+        "201":
+          description: Created mood entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MoodEntry"
+
+  # Goals
+  /goals:
+    get:
+      operationId: listGoals
+      tags: [goals]
+      summary: List all goals
+      responses:
+        "200":
+          description: List of goals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Goal"
+    post:
+      operationId: createGoal
+      tags: [goals]
+      summary: Create a goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGoalBody"
+      responses:
+        "201":
+          description: Created goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+
+  /goals/{id}:
+    put:
+      operationId: updateGoal
+      tags: [goals]
+      summary: Update a goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGoalBody"
+      responses:
+        "200":
+          description: Updated goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+    delete:
+      operationId: deleteGoal
+      tags: [goals]
+      summary: Delete a goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Daily Quote
+  /nex/daily-quote:
+    get:
+      operationId: getDailyQuote
+      tags: [anthropic]
+      summary: Get an AI-generated daily motivational quote
+      responses:
+        "200":
+          description: Daily quote
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyQuote"
+
 components:
   schemas:
     HealthStatus:
@@ -1038,3 +1470,368 @@ components:
           type: string
       required:
         - error
+
+    Habit:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        name:
+          type: string
+        icon:
+          type: string
+        color:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - name
+        - icon
+        - color
+        - createdAt
+
+    CreateHabitBody:
+      type: object
+      properties:
+        name:
+          type: string
+        icon:
+          type: string
+        color:
+          type: string
+      required:
+        - name
+
+    HabitLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        habitId:
+          type: integer
+        userId:
+          type: string
+        date:
+          type: string
+        completed:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - habitId
+        - userId
+        - date
+        - completed
+        - createdAt
+
+    LogHabitBody:
+      type: object
+      properties:
+        date:
+          type: string
+        completed:
+          type: boolean
+      required:
+        - date
+        - completed
+
+    Bookmark:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - title
+        - url
+        - description
+        - createdAt
+
+    CreateBookmarkBody:
+      type: object
+      properties:
+        title:
+          type: string
+        url:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+      required:
+        - title
+        - url
+
+    ReadingItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        title:
+          type: string
+        author:
+          type: string
+        url:
+          type: string
+        status:
+          type: string
+        progress:
+          type: integer
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - title
+        - author
+        - url
+        - status
+        - progress
+        - notes
+        - createdAt
+        - updatedAt
+
+    CreateReadingItemBody:
+      type: object
+      properties:
+        title:
+          type: string
+        author:
+          type: string
+        url:
+          type: string
+        status:
+          type: string
+        progress:
+          type: integer
+        notes:
+          type: string
+      required:
+        - title
+
+    UpdateReadingItemBody:
+      type: object
+      properties:
+        title:
+          type: string
+        author:
+          type: string
+        url:
+          type: string
+        status:
+          type: string
+        progress:
+          type: integer
+        notes:
+          type: string
+
+    FlashcardSet:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - title
+        - description
+        - createdAt
+
+    CreateFlashcardSetBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+      required:
+        - title
+
+    Flashcard:
+      type: object
+      properties:
+        id:
+          type: integer
+        setId:
+          type: integer
+        userId:
+          type: string
+        front:
+          type: string
+        back:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - setId
+        - userId
+        - front
+        - back
+        - createdAt
+
+    CreateFlashcardBody:
+      type: object
+      properties:
+        front:
+          type: string
+        back:
+          type: string
+      required:
+        - front
+        - back
+
+    MoodEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        mood:
+          type: integer
+        note:
+          type: string
+        date:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - mood
+        - note
+        - date
+        - createdAt
+
+    CreateMoodBody:
+      type: object
+      properties:
+        mood:
+          type: integer
+        note:
+          type: string
+        date:
+          type: string
+      required:
+        - mood
+        - date
+
+    Goal:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        targetDate:
+          type: string
+        progress:
+          type: integer
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - title
+        - description
+        - targetDate
+        - progress
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateGoalBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        targetDate:
+          type: string
+        progress:
+          type: integer
+        status:
+          type: string
+      required:
+        - title
+
+    UpdateGoalBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        targetDate:
+          type: string
+        progress:
+          type: integer
+        status:
+          type: string
+
+    DailyQuote:
+      type: object
+      properties:
+        quote:
+          type: string
+        author:
+          type: string
+      required:
+        - quote
+        - author

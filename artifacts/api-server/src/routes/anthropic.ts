@@ -164,4 +164,31 @@ router.post("/anthropic/conversations/:id/messages", requireAuth, async (req: an
   }
 });
 
+router.get("/nex/daily-quote", requireAuth, async (req: any, res) => {
+  try {
+    const today = new Date().toISOString().split("T")[0];
+    const message = await anthropic.messages.create({
+      model: "claude-sonnet-4-5",
+      max_tokens: 150,
+      messages: [
+        {
+          role: "user",
+          content: `Give me a short, powerful motivational quote for a developer or student for today (${today}). Reply with ONLY a JSON object like: {"quote": "...", "author": "..."}. The quote should be original or attributed to a real person.`,
+        },
+      ],
+    });
+    const text = message.content[0].type === "text" ? message.content[0].text : "";
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      const parsed = JSON.parse(match[0]);
+      res.json(parsed);
+    } else {
+      res.json({ quote: "The secret of getting ahead is getting started.", author: "Mark Twain" });
+    }
+  } catch (err) {
+    req.log.error(err);
+    res.json({ quote: "The secret of getting ahead is getting started.", author: "Mark Twain" });
+  }
+});
+
 export default router;

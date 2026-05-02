@@ -1,11 +1,11 @@
-import { useGetDashboardStats, useGetRecentPages, useGetTodayTasks } from "@workspace/api-client-react";
+import { useGetDashboardStats, useGetRecentPages, useGetTodayTasks, useGetDailyQuote } from "@workspace/api-client-react";
 import { useUser } from "@clerk/react";
 import { Link } from "wouter";
-import { BarChart, Bar, XAxis, ResponsiveContainer, Tooltip } from "recharts";
-import { Zap, FileText, CheckSquare, Flame, TrendingUp, ArrowRight, Clock } from "lucide-react";
+import { Zap, FileText, CheckSquare, Flame, TrendingUp, ArrowRight, Clock, Quote } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function StatCard({ label, value, icon: Icon, color }: {
   label: string;
@@ -30,37 +30,55 @@ function StatCard({ label, value, icon: Icon, color }: {
   );
 }
 
-const mockWeekData = [
-  { day: "Mon", tasks: 3 },
-  { day: "Tue", tasks: 5 },
-  { day: "Wed", tasks: 2 },
-  { day: "Thu", tasks: 7 },
-  { day: "Fri", tasks: 4 },
-  { day: "Sat", tasks: 1 },
-  { day: "Sun", tasks: 6 },
-];
-
 export default function DashboardPage() {
   const { user } = useUser();
+  const { t, lang } = useLanguage();
   const stats = useGetDashboardStats();
   const recentPages = useGetRecentPages();
   const todayTasks = useGetTodayTasks();
+  const dailyQuote = useGetDailyQuote();
 
-  const firstName = user?.firstName || user?.username || "there";
+  const firstName = user?.firstName || user?.username || "";
   const hour = new Date().getHours();
   const greeting =
-    hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+    lang === "ar"
+      ? hour < 12 ? "صباح الخير" : hour < 17 ? "مساء الخير" : "مساء النور"
+      : hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
+  const dateStr = new Date().toLocaleDateString(lang === "ar" ? "ar-SA" : "en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8">
       <div className="mb-8">
         <h1 className="text-4xl font-serif" data-testid="dashboard-greeting">
-          {greeting}, {firstName} ✦
+          {greeting}{firstName ? `, ${firstName}` : ""} ✦
         </h1>
-        <p className="text-muted-foreground mt-1">
-          {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-        </p>
+        <p className="text-muted-foreground mt-1">{dateStr}</p>
       </div>
+
+      {/* Daily Quote */}
+      <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
+        <CardContent className="pt-4 pb-4">
+          <div className="flex gap-3 items-start">
+            <Quote className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs text-muted-foreground font-medium mb-1 uppercase tracking-wider">{t.dashboard.dailyQuote}</p>
+              {dailyQuote.isLoading ? (
+                <Skeleton className="h-5 w-64" />
+              ) : (
+                <>
+                  <p className="font-serif text-base italic">"{dailyQuote.data?.quote}"</p>
+                  <p className="text-xs text-muted-foreground mt-1">— {dailyQuote.data?.author}</p>
+                </>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {stats.isLoading ? (
@@ -70,25 +88,25 @@ export default function DashboardPage() {
         ) : (
           <>
             <StatCard
-              label="Tasks Done"
+              label={t.dashboard.stats.tasksCompleted}
               value={stats.data?.tasksCompletedThisWeek ?? 0}
               icon={CheckSquare}
               color="bg-primary/10 text-primary"
             />
             <StatCard
-              label="Notes Written"
+              label={t.dashboard.stats.notesWritten}
               value={stats.data?.notesWritten ?? 0}
               icon={FileText}
               color="bg-accent text-accent-foreground"
             />
             <StatCard
-              label="Day Streak"
+              label={t.dashboard.stats.streak}
               value={`${stats.data?.streakDays ?? 0}🔥`}
               icon={Flame}
               color="bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-400"
             />
             <StatCard
-              label="Flow Score"
+              label={t.dashboard.stats.focusSessions}
               value={stats.data?.flowScore ?? 0}
               icon={TrendingUp}
               color="bg-secondary text-secondary-foreground"
@@ -99,31 +117,46 @@ export default function DashboardPage() {
 
       <div className="grid md:grid-cols-3 gap-6">
         <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-lg font-serif font-normal">Weekly Activity</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-lg font-serif font-normal">{t.dashboard.weeklyBriefing}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={150}>
-              <BarChart data={mockWeekData} barSize={22}>
-                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
-                <Tooltip
-                  cursor={{ fill: "hsl(var(--muted))" }}
-                  contentStyle={{
-                    background: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "0.5rem",
-                    fontSize: 12,
-                  }}
-                />
-                <Bar dataKey="tasks" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="grid grid-cols-2 gap-3">
+              <Link href="/habits">
+                <div className="p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer group">
+                  <p className="text-xs text-muted-foreground mb-1">{t.nav.habits}</p>
+                  <p className="text-xl font-serif">🎯</p>
+                  <p className="text-xs text-muted-foreground mt-1 group-hover:text-foreground transition-colors">{t.habits.emptyHint}</p>
+                </div>
+              </Link>
+              <Link href="/goals">
+                <div className="p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer group">
+                  <p className="text-xs text-muted-foreground mb-1">{t.nav.goals}</p>
+                  <p className="text-xl font-serif">🏆</p>
+                  <p className="text-xs text-muted-foreground mt-1 group-hover:text-foreground transition-colors">{t.goals.emptyHint}</p>
+                </div>
+              </Link>
+              <Link href="/reading">
+                <div className="p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer group">
+                  <p className="text-xs text-muted-foreground mb-1">{t.nav.reading}</p>
+                  <p className="text-xl font-serif">📚</p>
+                  <p className="text-xs text-muted-foreground mt-1 group-hover:text-foreground transition-colors">{t.reading.emptyHint}</p>
+                </div>
+              </Link>
+              <Link href="/mood">
+                <div className="p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer group">
+                  <p className="text-xs text-muted-foreground mb-1">{t.nav.mood}</p>
+                  <p className="text-xl font-serif">😊</p>
+                  <p className="text-xs text-muted-foreground mt-1 group-hover:text-foreground transition-colors">{t.mood.emptyHint}</p>
+                </div>
+              </Link>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-lg font-serif font-normal">Today's Focus</CardTitle>
+            <CardTitle className="text-lg font-serif font-normal">Today</CardTitle>
             <Link href="/workspaces">
               <button className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1" data-testid="view-all-tasks">
                 All <ArrowRight className="w-3 h-3" />
@@ -136,7 +169,7 @@ export default function DashboardPage() {
             ) : todayTasks.data?.length === 0 ? (
               <div className="text-center py-6">
                 <Zap className="w-8 h-8 text-primary mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">All clear! Add tasks in your workspaces.</p>
+                <p className="text-sm text-muted-foreground">{t.dashboard.noRecentPages}</p>
               </div>
             ) : (
               todayTasks.data?.map((task) => (
@@ -155,7 +188,7 @@ export default function DashboardPage() {
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-lg font-serif font-normal flex items-center gap-2">
               <Clock className="w-4 h-4 text-muted-foreground" />
-              Recent Pages
+              {t.dashboard.recentPages}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -163,7 +196,7 @@ export default function DashboardPage() {
               <Skeleton className="h-24 w-full" />
             ) : recentPages.data?.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">
-                No pages yet. Create your first page in a workspace.
+                {t.dashboard.noRecentPages}
               </p>
             ) : (
               <div className="divide-y divide-border">
@@ -178,7 +211,7 @@ export default function DashboardPage() {
                     </div>
                     <Link href={`/workspaces/${page.workspaceId}/pages`}>
                       <Badge variant="outline" className="text-xs cursor-pointer hover:bg-accent">
-                        Open
+                        {t.bookmarks.open}
                       </Badge>
                     </Link>
                   </div>
