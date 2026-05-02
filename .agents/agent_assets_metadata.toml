@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "Trr-8DR6zl6jXfywftAwn"
+uri = "file://DOCS.md"
+type = "text"
+title = "Nexus — توثيق تفصيلي شامل"
