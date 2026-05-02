@@ -228,25 +228,8 @@ html.rtl .font-serif {
   font-family: 'Cairo', system-ui, sans-serif;
 }
 
-/* RTL sidebar — flip from left to right */
-html[dir="rtl"] aside {
-  left: auto;
-  right: 0;
-  border-right: none;
-  border-left: 1px solid hsl(var(--sidebar-border));
-}
-
-html[dir="rtl"] aside.fixed {
-  transform: translateX(100%);
-}
-
-html[dir="rtl"] aside.fixed.translate-x-0 {
-  transform: translateX(0);
-}
-
-/* RTL margin/padding utilities */
-html[dir="rtl"] .ml-auto { margin-left: unset; margin-right: auto; }
-html[dir="rtl"] .mr-auto { margin-right: unset; margin-left: auto; }
+/* RTL logical border — desktop sidebar uses border-e which flips automatically */
+/* No manual RTL aside overrides needed — handled via Tailwind + dir attribute */
 
 /* Better scrollbar */
 ::-webkit-scrollbar {

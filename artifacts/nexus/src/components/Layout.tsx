@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, FolderOpen, Code2, Timer, Sparkles, Moon, Sun,
   Menu, Zap, Repeat2, Bookmark, BookOpen, Brain, Target, Smile,
-  BarChart3, Globe,
+  BarChart3, Globe, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -34,71 +34,112 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { href: "/flashcards", label: t.nav.flashcards, icon: Brain },
   ];
 
+  const sidebarContent = (
+    <>
+      {/* Logo */}
+      <div className="flex items-center gap-2.5 px-4 py-4 border-b border-sidebar-border">
+        <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+          <Zap className="w-4 h-4 text-primary-foreground" strokeWidth={2.5} />
+        </div>
+        <span className="font-serif text-xl text-sidebar-foreground tracking-tight flex-1">{t.appName}</span>
+        {/* Close button for mobile */}
+        <button onClick={() => setSidebarOpen(false)} className="md:hidden text-muted-foreground hover:text-foreground">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 px-2 py-3 overflow-y-auto" data-testid="sidebar-nav">
+        {navItems.map((item, idx) => {
+          if (item === null) {
+            return <div key={idx} className="mx-2 my-1.5 h-px bg-sidebar-border" />;
+          }
+          const { href, label, icon: Icon } = item;
+          const active = location === href || (href !== "/" && location.startsWith(href));
+          return (
+            <Link key={href} href={href} onClick={() => setSidebarOpen(false)}>
+              <div
+                data-testid={`nav-${label}`}
+                className={cn(
+                  "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer transition-colors mb-0.5",
+                  isRTL ? "flex-row-reverse text-right" : "flex-row text-left",
+                  active
+                    ? "bg-primary text-primary-foreground"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                )}
+              >
+                <Icon className="w-4 h-4 flex-shrink-0" />
+                <span className="flex-1 truncate">{label}</span>
+              </div>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Bottom controls */}
+      <div className="px-3 py-3 border-t border-sidebar-border space-y-2">
+        <button
+          onClick={() => setLang(lang === "en" ? "ar" : "en")}
+          className={cn(
+            "w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors",
+            isRTL ? "flex-row-reverse" : ""
+          )}
+        >
+          <Globe className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="flex-1 truncate">{t.common.language}</span>
+        </button>
+        <div className={cn("flex items-center gap-2", isRTL ? "flex-row-reverse" : "")}>
+          <UserButton />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggle}
+            className={cn("h-8 w-8", isRTL ? "mr-auto" : "ml-auto")}
+            data-testid="theme-toggle"
+          >
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+
   return (
-    <div className={cn("flex h-screen overflow-hidden bg-background", isRTL ? "flex-row-reverse" : "")}>
+    <div
+      className="flex h-screen overflow-hidden bg-background"
+      dir={isRTL ? "rtl" : "ltr"}
+    >
+      {/* Mobile overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-20 bg-black/40 md:hidden" onClick={() => setSidebarOpen(false)} />
+        <div
+          className="fixed inset-0 z-20 bg-black/40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
 
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex flex-col w-56 bg-sidebar border-sidebar-border flex-shrink-0 border-e">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile sidebar — slides in from the inline-start side */}
       <aside
         className={cn(
-          "fixed inset-y-0 z-30 flex flex-col w-56 bg-sidebar border-sidebar-border transition-transform duration-200 md:relative md:translate-x-0",
-          isRTL ? "right-0 border-l" : "left-0 border-r",
+          "fixed inset-y-0 z-30 flex flex-col w-56 bg-sidebar border-sidebar-border md:hidden transition-transform duration-200",
+          isRTL ? "right-0 border-s" : "left-0 border-e",
           sidebarOpen ? "translate-x-0" : isRTL ? "translate-x-full" : "-translate-x-full"
         )}
       >
-        <div className="flex items-center gap-2.5 px-4 py-4 border-b border-sidebar-border">
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-            <Zap className="w-4 h-4 text-primary-foreground" strokeWidth={2.5} />
-          </div>
-          <span className="font-serif text-xl text-sidebar-foreground tracking-tight">{t.appName}</span>
-        </div>
-
-        <nav className="flex-1 px-2 py-3 overflow-y-auto" data-testid="sidebar-nav">
-          {navItems.map((item, idx) => {
-            if (item === null) {
-              return <div key={idx} className="mx-2 my-1.5 h-px bg-sidebar-border" />;
-            }
-            const { href, label, icon: Icon } = item;
-            const active = location === href || (href !== "/" && location.startsWith(href));
-            return (
-              <Link key={href} href={href}>
-                <div
-                  data-testid={`nav-${label}`}
-                  className={cn(
-                    "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer transition-colors mb-0.5",
-                    active
-                      ? "bg-primary text-primary-foreground"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  )}
-                >
-                  <Icon className="w-4 h-4 flex-shrink-0" />
-                  <span className="truncate">{label}</span>
-                </div>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="px-3 py-3 border-t border-sidebar-border space-y-2">
-          <button
-            onClick={() => setLang(lang === "en" ? "ar" : "en")}
-            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          >
-            <Globe className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>{t.common.language}</span>
-          </button>
-          <div className="flex items-center gap-2">
-            <UserButton />
-            <Button variant="ghost" size="icon" onClick={toggle} className="ml-auto h-8 w-8" data-testid="theme-toggle">
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
-          </div>
-        </div>
+        {sidebarContent}
       </aside>
 
+      {/* Main content */}
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="flex items-center gap-3 px-4 py-3 border-b border-border md:hidden">
+        {/* Mobile header */}
+        <header className={cn(
+          "flex items-center gap-3 px-4 py-3 border-b border-border md:hidden",
+          isRTL ? "flex-row-reverse" : ""
+        )}>
           <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)}>
             <Menu className="w-5 h-5" />
           </Button>
