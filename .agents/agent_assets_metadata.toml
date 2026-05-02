@@ -6,3 +6,9 @@ id = "Trr-8DR6zl6jXfywftAwn"
 uri = "file://DOCS.md"
 type = "text"
 title = "Nexus — توثيق تفصيلي شامل"
+
+[[outputs]]
+id = "gSpPfvFwlFFV3fwC4kyNE"
+uri = "file://LOCAL_SETUP.md"
+type = "text"
+title = "دليل تشغيل Nexus على جهازك"
