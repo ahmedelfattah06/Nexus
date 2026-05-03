@@ -84,32 +84,6 @@ function OverviewTab() {
           <StatCard label="Tasks" value={s.tasks} icon={CheckSquare} color="text-green-500" />
         </div>
       </div>
-      <div>
-        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Activity & AI</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="Conversations" value={s.conversations} icon={MessageSquare} color="text-cyan-500" />
-          <StatCard label="Messages" value={s.messages} icon={Brain} color="text-pink-500" />
-          <StatCard label="Focus Sessions" value={s.focusSessions} icon={Activity} color="text-orange-500" />
-          <StatCard label="Moods Logged" value={s.moods} icon={Smile} color="text-rose-500" />
-        </div>
-      </div>
-      <div>
-        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Knowledge & Habits</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="Habits" value={s.habits} icon={RefreshCw} color="text-emerald-500" />
-          <StatCard label="Goals" value={s.goals} icon={Target} color="text-indigo-500" />
-          <StatCard label="Flashcard Sets" value={s.flashcardSets} icon={Brain} color="text-teal-500" />
-          <StatCard label="Flashcards" value={s.flashcards} icon={Brain} color="text-sky-500" />
-        </div>
-      </div>
-      <div>
-        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Other</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="Snippets" value={s.snippets} icon={Database} color="text-slate-500" />
-          <StatCard label="Bookmarks" value={s.bookmarks} icon={Eye} color="text-yellow-500" />
-          <StatCard label="Admins" value={s.admins} icon={Shield} color="text-red-500" />
-        </div>
-      </div>
     </div>
   );
 }
@@ -130,9 +104,7 @@ function UsersTab() {
     <div className="grid md:grid-cols-5 gap-6">
       <div className="md:col-span-3 space-y-2">
         <p className="text-xs text-muted-foreground mb-3">{users.length} users found in system</p>
-        {users.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground"><Users className="w-10 h-10 mx-auto mb-3 opacity-30" /><p className="text-sm">No users yet</p></div>
-        ) : users.map((user: any) => (
+        {users.map((user: any) => (
           <div key={user.userId} onClick={() => setSelected(selected === user.userId ? null : user.userId)} className={cn("flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all", selected === user.userId ? "border-primary bg-primary/5" : "border-border hover:border-primary/30 hover:bg-muted/30")}>
             {user.imageUrl ? <img src={user.imageUrl} alt="" className="w-8 h-8 rounded-full flex-shrink-0 object-cover" /> : <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0"><Users className="w-4 h-4 text-muted-foreground" /></div>}
             <div className="flex-1 min-w-0">
@@ -185,10 +157,6 @@ function AITab() {
         <StatCard label="Total Messages" value={d.totalMessages} icon={Brain} color="text-violet-500" />
         <StatCard label="Avg Msgs / Conversation" value={d.avgMessagesPerConv} icon={TrendingUp} color="text-pink-500" />
       </div>
-      <div>
-        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Recent Conversations</h2>
-        {d.recentConversations?.length === 0 ? <div className="text-center py-12 text-muted-foreground/50"><MessageSquare className="w-10 h-10 mx-auto mb-3" /><p className="text-sm">No conversations yet</p></div> : <div className="space-y-2">{d.recentConversations?.map((conv: any) => <div key={conv.id} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border"><div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><MessageSquare className="w-4 h-4 text-primary" /></div><div className="flex-1 min-w-0"><p className="text-sm font-medium truncate">{conv.title || "Untitled conversation"}</p><p className="text-xs text-muted-foreground">{new Date(conv.createdAt).toLocaleDateString()}</p></div></div>)}</div>}
-      </div>
     </div>
   );
 }
@@ -197,23 +165,7 @@ function ContentTab() {
   const contentQ = useQuery({ queryKey: ["admin-recent-content"], queryFn: () => apiFetch("/api/admin/recent-content") });
   if (contentQ.isLoading) return <div className="space-y-3">{Array(6).fill(0).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}</div>;
   if (contentQ.isError) return <p className="text-destructive text-sm">Failed to load content</p>;
-  const { recentPages = [], recentTasks = [], recentGoals = [] } = contentQ.data ?? {};
-  return (
-    <div className="grid md:grid-cols-3 gap-6">
-      <div>
-        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2"><FileText className="w-4 h-4" /> Recent Pages</h2>
-        <div className="space-y-2">{recentPages.length === 0 ? <p className="text-xs text-muted-foreground">No pages yet</p> : recentPages.map((p: any) => (<div key={p.id} className="px-3 py-2.5 rounded-lg border border-border"><p className="text-sm font-medium truncate">{p.title || "Untitled"}</p><p className="text-xs text-muted-foreground font-mono truncate">{p.userId?.slice(0, 12)}…</p><p className="text-xs text-muted-foreground">{new Date(p.updatedAt).toLocaleDateString()}</p></div>))}</div>
-      </div>
-      <div>
-        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2"><CheckSquare className="w-4 h-4" /> Recent Tasks</h2>
-        <div className="space-y-2">{recentTasks.length === 0 ? <p className="text-xs text-muted-foreground">No tasks yet</p> : recentTasks.map((t: any) => (<div key={t.id} className="px-3 py-2.5 rounded-lg border border-border"><div className="flex items-center gap-2 mb-0.5"><p className="text-sm font-medium truncate flex-1">{t.title || "Untitled"}</p><span className={cn("text-xs px-1.5 py-0.5 rounded-full flex-shrink-0", t.status === "done" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : t.status === "in_progress" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" : "bg-muted text-muted-foreground")}>{t.status}</span></div><p className="text-xs text-muted-foreground font-mono truncate">{t.userId?.slice(0, 12)}…</p></div>))}</div>
-      </div>
-      <div>
-        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2"><Target className="w-4 h-4" /> Recent Goals</h2>
-        <div className="space-y-2">{recentGoals.length === 0 ? <p className="text-xs text-muted-foreground">No goals yet</p> : recentGoals.map((g: any) => (<div key={g.id} className="px-3 py-2.5 rounded-lg border border-border"><div className="flex items-center gap-2 mb-0.5"><p className="text-sm font-medium truncate flex-1">{g.title}</p><span className="text-xs text-muted-foreground flex-shrink-0">{g.progress}%</span></div><div className="h-1 bg-muted rounded-full overflow-hidden mb-1"><div className="h-full bg-primary rounded-full" style={{ width: `${g.progress}%` }} /></div><p className="text-xs text-muted-foreground font-mono truncate">{g.userId?.slice(0, 12)}…</p></div>))}</div>
-      </div>
-    </div>
-  );
+  return <div />;
 }
 
 export default function AdminPage() {
@@ -235,7 +187,7 @@ export default function AdminPage() {
           <h2 className="font-serif text-2xl mb-2">Bootstrap Admin</h2>
           <p className="text-muted-foreground text-sm mb-6">No admins exist yet. Click below to make this account the first admin.</p>
           <Button onClick={() => seed.mutate()} disabled={seed.isPending} className="gap-2"><Crown className="w-4 h-4" />{seed.isPending ? "Claiming…" : "Claim First Admin Role"}</Button>
-          <p className="text-xs text-muted-foreground mt-3">After this, only admins can access this panel.</p>
+          <p className="text-xs text-muted-foreground mt-3">After this, sign in with this same account to manage everything.</p>
         </div>
       </div>
     );
