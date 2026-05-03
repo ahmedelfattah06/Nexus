@@ -13,3 +13,4 @@ export * from "./flashcard_sets";
 export * from "./flashcards";
 export * from "./moods";
 export * from "./goals";
+export * from "./admins";

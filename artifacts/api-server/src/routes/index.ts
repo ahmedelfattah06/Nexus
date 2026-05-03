@@ -13,6 +13,7 @@ import readingRouter from "./reading";
 import flashcardsRouter from "./flashcards";
 import moodsRouter from "./moods";
 import goalsRouter from "./goals";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(readingRouter);
 router.use(flashcardsRouter);
 router.use(moodsRouter);
 router.use(goalsRouter);
+router.use(adminRouter);
 
 export default router;

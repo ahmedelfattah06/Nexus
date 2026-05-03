@@ -59,6 +59,15 @@ lib/
 - **Reading List** — want-to-read/reading/completed with progress slider
 - **Flashcards** — sets with card flip study mode
 
+### Admin Panel
+- **Route**: `/admin` — protected, requires login + admin role
+- **Tabs**: Overview (system-wide stats), Users (list + data + role management), AI Usage (conversations/messages), Content (recent pages/tasks/goals across all users)
+- **Admin role**: stored in `admins` DB table. First visit to `/admin` shows a "Claim Admin Role" button if no admins exist yet.
+- **API endpoints**: `GET /api/admin/check`, `POST /api/admin/seed`, `GET /api/admin/stats`, `GET /api/admin/users`, `GET /api/admin/users/:id/data`, `DELETE /api/admin/users/:id/data`, `POST /api/admin/users/:id/promote`, `DELETE /api/admin/users/:id/promote`, `GET /api/admin/ai-stats`, `GET /api/admin/recent-content`, `GET /api/admin/growth`
+- **Middleware**: `requireAdmin` checks `admins` table before every admin route
+- **Clerk integration**: fetches user names/emails via Clerk REST API using `CLERK_SECRET_KEY`
+- **Sidebar**: Admin Panel link only visible to admins
+
 ## Key Updates
 
 - Ownership checks are enforced on user-owned resources.
@@ -66,6 +75,7 @@ lib/
 - AI routes include rate limiting, quote caching, and SSE cleanup on disconnect.
 - Habit streaks are calculated from `habit_logs` and duplicate daily mood entries are blocked.
 - Database indexes and cascade deletes are in place for the main user-owned tables.
+- Full admin panel added with role-based access control via `admins` DB table.
 
 ## Key Commands
 

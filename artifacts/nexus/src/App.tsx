@@ -21,6 +21,7 @@ import FlashcardsPage from "@/pages/flashcards";
 import GoalsPage from "@/pages/goals";
 import MoodPage from "@/pages/mood";
 import AnalyticsPage from "@/pages/analytics";
+import AdminPage from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -157,6 +158,7 @@ function AppRouter() {
       <Route path="/goals" component={() => <ProtectedRoute><GoalsPage /></ProtectedRoute>} />
       <Route path="/mood" component={() => <ProtectedRoute><MoodPage /></ProtectedRoute>} />
       <Route path="/analytics" component={() => <ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
+      <Route path="/admin" component={() => <ProtectedRoute><AdminPage /></ProtectedRoute>} />
       <Route component={NotFound} />
     </Switch>
   );

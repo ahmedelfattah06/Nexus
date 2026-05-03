@@ -65,7 +65,8 @@ export default function ReadingPage() {
   }
 
   const statuses = ["all", "want_to_read", "reading", "completed"];
-  const filtered = filter === "all" ? (items.data || []) : (items.data || []).filter(i => i.status === filter);
+  const itemsList: any[] = Array.isArray(items.data) ? items.data : (items.data as any)?.data ?? [];
+  const filtered = filter === "all" ? itemsList : itemsList.filter(i => i.status === filter);
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">

@@ -7,8 +7,23 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, FolderOpen, Code2, Timer, Sparkles, Moon, Sun,
   Menu, Zap, Repeat2, Bookmark, BookOpen, Brain, Target, Smile,
-  BarChart3, Globe, X,
+  BarChart3, Globe, X, Shield,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+function useIsAdmin() {
+  return useQuery({
+    queryKey: ["admin-check"],
+    queryFn: async () => {
+      const r = await fetch(`${BASE}/api/admin/check`, { credentials: "include" });
+      if (!r.ok) return { isAdmin: false };
+      return r.json();
+    },
+    staleTime: 60000,
+    retry: false,
+  });
+}
 import { Button } from "@/components/ui/button";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -16,6 +31,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { isDark, toggle } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { t, lang, setLang, isRTL } = useLanguage();
+  const adminQ = useIsAdmin();
+  const isAdmin = adminQ.data?.isAdmin === true;
 
   const navItems = [
     { href: "/dashboard", label: t.nav.cockpit, icon: LayoutDashboard },
@@ -32,6 +49,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { href: "/bookmarks", label: t.nav.bookmarks, icon: Bookmark },
     { href: "/reading", label: t.nav.reading, icon: BookOpen },
     { href: "/flashcards", label: t.nav.flashcards, icon: Brain },
+    ...(isAdmin ? [null, { href: "/admin", label: "Admin Panel", icon: Shield }] : []),
   ];
 
   const sidebarContent = (
