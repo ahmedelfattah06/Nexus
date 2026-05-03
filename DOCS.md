@@ -1,14 +1,15 @@
-# Nexus — دليل التشغيل والإعداد
+# Nexus — دليل التشغيل السريع
 
-## ما هو Nexus؟
-Nexus هو workspace إنتاجي ذكي يشبه Notion، يجمع الملاحظات، المهام، العادات، الأهداف، القراءة، البطاقات التعليمية، والذكاء الاصطناعي في مكان واحد.
+## Nexus هو إيه؟
+Nexus مساحة عمل إنتاجية ذكية بتجمع الملاحظات، المهام، العادات، الأهداف، المفضلة، القراءة، البطاقات التعليمية، وAI في مكان واحد.
 
-## المتطلبات
-- Node.js 24+
-- pnpm
-- PostgreSQL
-- Clerk
-- إعدادات AI الخاصة بـ Replit/Anthropic
+## عشان تشغله على جهازك
+1. ثبّت Node.js و pnpm.
+2. جهّز PostgreSQL.
+3. جهّز Clerk.
+4. انسخ ملفات البيئة واملأها بالقيم المطلوبة.
+5. شغّل قاعدة البيانات.
+6. شغّل الـ backend والـ frontend.
 
 ## ملفات البيئة المطلوبة
 ### api-server
@@ -20,42 +21,37 @@ Nexus هو workspace إنتاجي ذكي يشبه Notion، يجمع الملاح
 ### nexus frontend
 - `VITE_CLERK_PUBLISHABLE_KEY`
 - `VITE_CLERK_PROXY_URL`
-- `BASE_PATH` غالبًا `/`
+- `BASE_PATH` وغالبًا يكون `/`
 
-## التشغيل محليًا أو على Replit
-1. ثبّت الحزم:
+## خطوات التشغيل
 ```bash
 pnpm install
-```
-2. ادفع الـ schema لقاعدة البيانات:
-```bash
 pnpm --filter @workspace/db run push
 ```
-3. شغّل الـ workflows:
-- `artifacts/api-server`
-- `artifacts/nexus`
 
-## الروابط الأساسية
+ثم شغّل:
+- `pnpm --filter @workspace/api-server run dev`
+- `pnpm --filter @workspace/nexus run dev`
+
+## الروابط المهمة
 - الصفحة الرئيسية: `/`
 - تسجيل الدخول: `/sign-in`
 - إنشاء حساب: `/sign-up`
 - لوحة الأدمن: `/admin`
 
-## تشغيل الـ AI
+## الـ AI شغال إزاي؟
 - صفحة الـ AI هي `/nex`
-- الردود بتوصل streaming عبر SSE
-- الاقتباس اليومي في الـ dashboard
-- لو ظهر 429 في اليومية فده بسبب rate limiting الطبيعي
+- الردود بتظهر بشكل streaming
+- الاقتباس اليومي بيتجاب من نفس منظومة الـ AI
+- لو ظهر 429 فده غالبًا rate limit طبيعي
 
 ## الأدمن
-- الأدمن مش يوزر/باسورد منفصل
-- أول مستخدم يفتح `/admin` ويضغط `Claim First Admin Role` يبقى admin
-- بعد وجود admin، باقي الوصول للأدمن يظل محمي
+- أول مستخدم يدخل `/admin` يقدر يضغط `Claim First Admin Role`
+- بعدها الحساب ده يبقى الأدمن الأول
+- بعد وجود أدمن، الوصول للوحة بيبقى محمي
 
-## أوامر مفيدة
-```bash
-pnpm run typecheck
-pnpm run typecheck:libs
-pnpm --filter @workspace/api-spec run codegen
-pnpm --filter @workspace/db run push
-```
+## لو حصلت مشكلة
+- راجع `DATABASE_URL`
+- راجع Clerk keys
+- تأكد إن قاعدة البيانات اتعملت لها push
+- تأكد إن workflow شغال
