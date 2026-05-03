@@ -2,8 +2,9 @@ import { Router } from "express";
 import { getAuth } from "@clerk/express";
 import { db } from "@workspace/db";
 import { snippetsTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc, count } from "drizzle-orm";
 import { CreateSnippetBody, UpdateSnippetBody } from "@workspace/api-zod";
+import { parsePagination, buildPaginationMeta } from "../utils/pagination";
 
 const router = Router();
 
@@ -15,20 +16,32 @@ function requireAuth(req: any, res: any, next: any) {
   next();
 }
 
-router.get("/snippets", requireAuth, async (req: any, res) => {
+router.get("/snippets", requireAuth, async (req: any, res, next) => {
   try {
-    const snippets = await db
-      .select()
-      .from(snippetsTable)
-      .where(eq(snippetsTable.userId, req.userId));
-    res.json(snippets);
+    const { page, limit, offset } = parsePagination(req.query);
+
+    const [items, [countResult]] = await Promise.all([
+      db
+        .select()
+        .from(snippetsTable)
+        .where(eq(snippetsTable.userId, req.userId))
+        .orderBy(desc(snippetsTable.updatedAt))
+        .limit(limit)
+        .offset(offset),
+      db
+        .select({ count: count() })
+        .from(snippetsTable)
+        .where(eq(snippetsTable.userId, req.userId)),
+    ]);
+
+    const total = Number(countResult?.count ?? 0);
+    res.json({ data: items, pagination: buildPaginationMeta(page, limit, total) });
   } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    next(err);
   }
 });
 
-router.post("/snippets", requireAuth, async (req: any, res) => {
+router.post("/snippets", requireAuth, async (req: any, res, next) => {
   const result = CreateSnippetBody.safeParse(req.body);
   if (!result.success) return res.status(400).json({ error: "Invalid body" });
   try {
@@ -38,39 +51,49 @@ router.post("/snippets", requireAuth, async (req: any, res) => {
       .returning();
     res.status(201).json(snippet);
   } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    next(err);
   }
 });
 
-router.put("/snippets/:id", requireAuth, async (req: any, res) => {
+router.put("/snippets/:id", requireAuth, async (req: any, res, next) => {
   const id = parseInt(req.params.id);
   const result = UpdateSnippetBody.safeParse(req.body);
   if (!result.success) return res.status(400).json({ error: "Invalid body" });
   try {
+    const [existing] = await db
+      .select()
+      .from(snippetsTable)
+      .where(eq(snippetsTable.id, id));
+
+    if (!existing) return res.status(404).json({ error: "Not found" });
+    if (existing.userId !== req.userId) return res.status(403).json({ error: "Forbidden" });
+
     const [snippet] = await db
       .update(snippetsTable)
       .set({ ...result.data, updatedAt: new Date() })
-      .where(and(eq(snippetsTable.id, id), eq(snippetsTable.userId, req.userId)))
+      .where(eq(snippetsTable.id, id))
       .returning();
-    if (!snippet) return res.status(404).json({ error: "Not found" });
     res.json(snippet);
   } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    next(err);
   }
 });
 
-router.delete("/snippets/:id", requireAuth, async (req: any, res) => {
+router.delete("/snippets/:id", requireAuth, async (req: any, res, next) => {
   const id = parseInt(req.params.id);
   try {
-    await db
-      .delete(snippetsTable)
-      .where(and(eq(snippetsTable.id, id), eq(snippetsTable.userId, req.userId)));
+    const [existing] = await db
+      .select()
+      .from(snippetsTable)
+      .where(eq(snippetsTable.id, id));
+
+    if (!existing) return res.status(404).json({ error: "Not found" });
+    if (existing.userId !== req.userId) return res.status(403).json({ error: "Forbidden" });
+
+    await db.delete(snippetsTable).where(eq(snippetsTable.id, id));
     res.status(204).send();
   } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    next(err);
   }
 });
 

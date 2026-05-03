@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { useListHabits, useCreateHabit, useDeleteHabit, useGetTodayHabitLogs, useLogHabit } from "@workspace/api-client-react";
+import { useListHabits, useCreateHabit, useDeleteHabit, useLogHabit } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { getListHabitsQueryKey, getGetTodayHabitLogsQueryKey } from "@workspace/api-client-react";
+import { getListHabitsQueryKey } from "@workspace/api-client-react";
 import { Plus, Trash2, CheckCircle2, Circle, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -23,14 +24,16 @@ export default function HabitsPage() {
   const qc = useQueryClient();
   const { toast } = useToast();
 
-  const habits = useListHabits();
-  const todayLogs = useGetTodayHabitLogs();
+  const habitsQuery = useListHabits();
   const create = useCreateHabit();
   const remove = useDeleteHabit();
   const log = useLogHabit();
 
   const today = new Date().toISOString().split("T")[0];
-  const completedToday = new Set((todayLogs.data || []).filter(l => l.completed).map(l => l.habitId));
+
+  const habitsList: any[] = Array.isArray(habitsQuery.data)
+    ? habitsQuery.data
+    : (habitsQuery.data as any)?.data ?? [];
 
   async function handleCreate() {
     if (!name.trim()) return;
@@ -44,12 +47,11 @@ export default function HabitsPage() {
     }
   }
 
-  async function handleToggle(habitId: number) {
-    const isCompleted = completedToday.has(habitId);
-    if (isCompleted) return;
+  async function handleToggle(habitId: number, completedToday: boolean) {
+    if (completedToday) return;
     try {
       await log.mutateAsync({ id: habitId, data: { date: today, completed: true } });
-      qc.invalidateQueries({ queryKey: getGetTodayHabitLogsQueryKey() });
+      qc.invalidateQueries({ queryKey: getListHabitsQueryKey() });
     } catch {
       toast({ title: t.common.error, variant: "destructive" });
     }
@@ -65,8 +67,8 @@ export default function HabitsPage() {
     }
   }
 
-  const completedCount = completedToday.size;
-  const totalCount = habits.data?.length || 0;
+  const completedCount = habitsList.filter((h: any) => h.completedToday).length;
+  const totalCount = habitsList.length;
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-8">
@@ -126,11 +128,11 @@ export default function HabitsPage() {
         </Card>
       )}
 
-      {habits.isLoading ? (
+      {habitsQuery.isLoading ? (
         <div className="space-y-3">
           {Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
         </div>
-      ) : habits.data?.length === 0 ? (
+      ) : habitsList.length === 0 ? (
         <div className="text-center py-20">
           <div className="text-5xl mb-4">🌱</div>
           <h3 className="font-serif text-2xl mb-2">{t.habits.empty}</h3>
@@ -138,16 +140,23 @@ export default function HabitsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {habits.data?.map((habit) => {
-            const done = completedToday.has(habit.id);
+          {habitsList.map((habit: any) => {
+            const done = habit.completedToday ?? false;
+            const streak = habit.streak ?? 0;
             return (
-              <Card key={habit.id} className={`transition-all cursor-pointer group ${done ? "opacity-70" : ""}`} onClick={() => handleToggle(habit.id)}>
+              <Card key={habit.id} className={`transition-all cursor-pointer group ${done ? "opacity-70" : ""}`} onClick={() => handleToggle(habit.id, done)}>
                 <CardContent className="pt-4 pb-4 flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style={{ backgroundColor: `${habit.color}20` }}>
                     {habit.icon}
                   </div>
                   <div className="flex-1">
                     <div className={`font-medium ${done ? "line-through text-muted-foreground" : ""}`}>{habit.name}</div>
+                    {streak > 0 && (
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <Flame className="w-3 h-3 text-orange-500" />
+                        <span className="text-xs text-orange-500 font-medium">{streak} day streak</span>
+                      </div>
+                    )}
                   </div>
                   {done ? (
                     <CheckCircle2 className="w-6 h-6 flex-shrink-0" style={{ color: habit.color }} />

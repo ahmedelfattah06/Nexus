@@ -15,11 +15,14 @@ export default function MoodPage() {
   const qc = useQueryClient();
   const { toast } = useToast();
 
-  const moods = useListMoods();
+  const moodsQuery = useListMoods();
   const create = useCreateMood();
 
+  const moodsList: any[] = (moodsQuery.data as any)?.data ?? moodsQuery.data ?? [];
+
   const today = new Date().toISOString().split("T")[0];
-  const todayLog = moods.data?.find(m => m.date === today);
+  const safeMoods = Array.isArray(moodsList) ? moodsList : [];
+  const todayLog = safeMoods.find((m: any) => m.date === today);
 
   async function handleLog() {
     if (selectedMood === null) return;
@@ -28,12 +31,17 @@ export default function MoodPage() {
       qc.invalidateQueries({ queryKey: getListMoodsQueryKey() });
       setNote(""); setSelectedMood(null);
       toast({ title: t.mood.logged });
-    } catch {
-      toast({ title: t.common.error, variant: "destructive" });
+    } catch (err: any) {
+      if (err?.response?.status === 409) {
+        toast({ title: "Already logged today", variant: "destructive" });
+        qc.invalidateQueries({ queryKey: getListMoodsQueryKey() });
+      } else {
+        toast({ title: t.common.error, variant: "destructive" });
+      }
     }
   }
 
-  const last7 = (moods.data || []).slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7);
+  const last7 = safeMoods.slice().sort((a: any, b: any) => b.date.localeCompare(a.date)).slice(0, 7);
 
   const moodColors = ["bg-red-400", "bg-orange-400", "bg-yellow-400", "bg-green-400", "bg-emerald-500"];
 
@@ -57,7 +65,7 @@ export default function MoodPage() {
           ) : (
             <>
               <div className="flex justify-center gap-3 mb-6">
-                {t.mood.moodEmojis.map((emoji, idx) => (
+                {t.mood.moodEmojis.map((emoji: string, idx: number) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedMood(idx + 1)}
@@ -87,7 +95,7 @@ export default function MoodPage() {
 
       <div>
         <h2 className="text-lg font-medium mb-4">{t.mood.history}</h2>
-        {moods.isLoading ? (
+        {moodsQuery.isLoading ? (
           <div className="space-y-2">{Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
         ) : last7.length === 0 ? (
           <div className="text-center py-10">
@@ -95,7 +103,7 @@ export default function MoodPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {last7.map(entry => (
+            {last7.map((entry: any) => (
               <Card key={entry.id}>
                 <CardContent className="pt-3 pb-3 flex items-center gap-4">
                   <span className="text-2xl">{t.mood.moodEmojis[entry.mood - 1]}</span>

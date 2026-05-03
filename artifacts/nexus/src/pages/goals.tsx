@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -22,10 +20,12 @@ export default function GoalsPage() {
   const qc = useQueryClient();
   const { toast } = useToast();
 
-  const goals = useListGoals();
+  const goalsQuery = useListGoals();
   const create = useCreateGoal();
   const update = useUpdateGoal();
   const remove = useDeleteGoal();
+
+  const goalsList: any[] = (goalsQuery.data as any)?.data ?? goalsQuery.data ?? [];
 
   async function handleCreate() {
     if (!title.trim()) return;
@@ -40,7 +40,7 @@ export default function GoalsPage() {
   }
 
   async function handleProgressUpdate(id: number, progress: number) {
-    const goal = goals.data?.find(g => g.id === id);
+    const goal = goalsList.find((g: any) => g.id === id);
     if (!goal) return;
     try {
       await update.mutateAsync({ id, data: { progress, status: progress === 100 ? "completed" : goal.status } });
@@ -65,11 +65,10 @@ export default function GoalsPage() {
     }
   }
 
-  const active = (goals.data || []).filter(g => g.status === "active");
-  const completed = (goals.data || []).filter(g => g.status === "completed");
-  const paused = (goals.data || []).filter(g => g.status === "paused");
-
-  const statusVariant: Record<string, string> = { active: "default", completed: "outline", paused: "secondary" };
+  const safeList = Array.isArray(goalsList) ? goalsList : [];
+  const active = safeList.filter((g: any) => g.status === "active");
+  const completed = safeList.filter((g: any) => g.status === "completed");
+  const paused = safeList.filter((g: any) => g.status === "paused");
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
@@ -107,9 +106,9 @@ export default function GoalsPage() {
         </Dialog>
       </div>
 
-      {goals.isLoading ? (
+      {goalsQuery.isLoading ? (
         <div className="space-y-4">{Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}</div>
-      ) : goals.data?.length === 0 ? (
+      ) : safeList.length === 0 ? (
         <div className="text-center py-20">
           <Target className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
           <h3 className="font-serif text-2xl mb-2">{t.goals.empty}</h3>
@@ -122,7 +121,7 @@ export default function GoalsPage() {
               <div key={label}>
                 <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">{label}</h2>
                 <div className="space-y-3">
-                  {items.map(goal => (
+                  {items.map((goal: any) => (
                     <Card key={goal.id} className="group hover:shadow-sm transition-shadow">
                       <CardContent className="pt-4 pb-4">
                         <div className="flex items-start gap-3">

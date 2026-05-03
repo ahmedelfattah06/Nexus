@@ -1,8 +1,16 @@
 import { Router } from "express";
 import { getAuth } from "@clerk/express";
 import { db } from "@workspace/db";
-import { workspacesTable, pagesTable, tasksTable, focusSessionsTable } from "@workspace/db";
+import {
+  workspacesTable,
+  pagesTable,
+  tasksTable,
+  focusSessionsTable,
+  habitsTable,
+  habitLogsTable,
+} from "@workspace/db";
 import { eq, and, gte, desc, count, sql } from "drizzle-orm";
+import { calculateStreak } from "../utils/streak";
 
 const router = Router();
 
@@ -14,7 +22,7 @@ function requireAuth(req: any, res: any, next: any) {
   next();
 }
 
-router.get("/dashboard/stats", requireAuth, async (req: any, res) => {
+router.get("/dashboard/stats", requireAuth, async (req: any, res, next) => {
   try {
     const userId = req.userId;
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -48,27 +56,40 @@ router.get("/dashboard/stats", requireAuth, async (req: any, res) => {
     const sessions = await db
       .select({ focusScore: focusSessionsTable.focusScore })
       .from(focusSessionsTable)
-      .where(and(eq(focusSessionsTable.userId, userId), gte(focusSessionsTable.date, weekAgo)));
+      .where(
+        and(
+          eq(focusSessionsTable.userId, userId),
+          gte(focusSessionsTable.date, weekAgo)
+        )
+      );
 
     const avgFocusScore =
       sessions.length > 0
-        ? Math.round(sessions.reduce((s, r) => s + r.focusScore, 0) / sessions.length)
+        ? Math.round(
+            sessions.reduce((s, r) => s + r.focusScore, 0) / sessions.length
+          )
         : 0;
 
-    const recentDates = await db
-      .select({ date: sql<string>`DATE(${focusSessionsTable.date})` })
-      .from(focusSessionsTable)
-      .where(eq(focusSessionsTable.userId, userId))
-      .orderBy(desc(focusSessionsTable.date))
-      .limit(30);
+    const habits = await db
+      .select({ id: habitsTable.id })
+      .from(habitsTable)
+      .where(eq(habitsTable.userId, userId));
 
     let streakDays = 0;
-    const today = new Date().toISOString().split("T")[0];
-    const dateSet = new Set(recentDates.map((r) => r.date));
-    let checkDate = new Date();
-    while (dateSet.has(checkDate.toISOString().split("T")[0])) {
-      streakDays++;
-      checkDate.setDate(checkDate.getDate() - 1);
+
+    if (habits.length > 0) {
+      const allLogs = await db
+        .select({ date: habitLogsTable.date })
+        .from(habitLogsTable)
+        .where(
+          and(
+            eq(habitLogsTable.userId, userId),
+            eq(habitLogsTable.completed, true)
+          )
+        )
+        .orderBy(desc(habitLogsTable.date));
+
+      streakDays = calculateStreak(allLogs);
     }
 
     res.json({
@@ -81,12 +102,11 @@ router.get("/dashboard/stats", requireAuth, async (req: any, res) => {
       totalPages: pageCount.count,
     });
   } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    next(err);
   }
 });
 
-router.get("/dashboard/recent-pages", requireAuth, async (req: any, res) => {
+router.get("/dashboard/recent-pages", requireAuth, async (req: any, res, next) => {
   try {
     const pages = await db
       .select({
@@ -103,23 +123,23 @@ router.get("/dashboard/recent-pages", requireAuth, async (req: any, res) => {
       .limit(5);
     res.json(pages);
   } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    next(err);
   }
 });
 
-router.get("/dashboard/today-tasks", requireAuth, async (req: any, res) => {
+router.get("/dashboard/today-tasks", requireAuth, async (req: any, res, next) => {
   try {
     const tasks = await db
       .select()
       .from(tasksTable)
-      .where(and(eq(tasksTable.userId, req.userId), eq(tasksTable.status, "todo")))
+      .where(
+        and(eq(tasksTable.userId, req.userId), eq(tasksTable.status, "todo"))
+      )
       .orderBy(desc(tasksTable.priority))
       .limit(3);
     res.json(tasks);
   } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    next(err);
   }
 });
 

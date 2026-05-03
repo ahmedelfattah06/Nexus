@@ -3,7 +3,7 @@ import { useListBookmarks, useCreateBookmark, useDeleteBookmark, getListBookmark
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2, ExternalLink, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,9 +23,11 @@ export default function BookmarksPage() {
   const qc = useQueryClient();
   const { toast } = useToast();
 
-  const bookmarks = useListBookmarks();
+  const bookmarksQuery = useListBookmarks();
   const create = useCreateBookmark();
   const remove = useDeleteBookmark();
+
+  const bookmarksList = (bookmarksQuery.data as any)?.data ?? bookmarksQuery.data ?? [];
 
   function addTag(e: React.KeyboardEvent) {
     if (e.key === "Enter" && tagInput.trim()) {
@@ -57,7 +59,7 @@ export default function BookmarksPage() {
     }
   }
 
-  const filtered = (bookmarks.data || []).filter(b =>
+  const filtered = (Array.isArray(bookmarksList) ? bookmarksList : []).filter((b: any) =>
     !search || b.title.toLowerCase().includes(search.toLowerCase()) || b.url.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -116,7 +118,7 @@ export default function BookmarksPage() {
 
       <Input className="mb-6" placeholder={t.common.searchPlaceholder} value={search} onChange={e => setSearch(e.target.value)} />
 
-      {bookmarks.isLoading ? (
+      {bookmarksQuery.isLoading ? (
         <div className="grid sm:grid-cols-2 gap-4">
           {Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)}
         </div>
@@ -128,7 +130,7 @@ export default function BookmarksPage() {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 gap-4">
-          {filtered.map(bookmark => (
+          {filtered.map((bookmark: any) => (
             <Card key={bookmark.id} className="group hover:shadow-md transition-shadow">
               <CardContent className="pt-4 pb-4">
                 <div className="flex items-start gap-3">
@@ -145,7 +147,7 @@ export default function BookmarksPage() {
                     {bookmark.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{bookmark.description}</p>}
                     {bookmark.tags && bookmark.tags.length > 0 && (
                       <div className="flex gap-1 flex-wrap mt-2">
-                        {bookmark.tags.map(tag => <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>)}
+                        {bookmark.tags.map((tag: string) => <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>)}
                       </div>
                     )}
                   </div>

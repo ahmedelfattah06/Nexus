@@ -2,7 +2,8 @@ import { Router } from "express";
 import { getAuth } from "@clerk/express";
 import { db } from "@workspace/db";
 import { goalsTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc, count } from "drizzle-orm";
+import { parsePagination, buildPaginationMeta } from "../utils/pagination";
 
 const router = Router();
 
@@ -14,49 +15,90 @@ function requireAuth(req: any, res: any, next: any) {
   next();
 }
 
-router.get("/goals", requireAuth, async (req: any, res) => {
+router.get("/goals", requireAuth, async (req: any, res, next) => {
   try {
-    const goals = await db.select().from(goalsTable).where(eq(goalsTable.userId, req.userId));
-    res.json(goals);
+    const { page, limit, offset } = parsePagination(req.query);
+
+    const [items, [countResult]] = await Promise.all([
+      db
+        .select()
+        .from(goalsTable)
+        .where(eq(goalsTable.userId, req.userId))
+        .orderBy(desc(goalsTable.createdAt))
+        .limit(limit)
+        .offset(offset),
+      db
+        .select({ count: count() })
+        .from(goalsTable)
+        .where(eq(goalsTable.userId, req.userId)),
+    ]);
+
+    const total = Number(countResult?.count ?? 0);
+    res.json({ data: items, pagination: buildPaginationMeta(page, limit, total) });
   } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    next(err);
   }
 });
 
-router.post("/goals", requireAuth, async (req: any, res) => {
+router.post("/goals", requireAuth, async (req: any, res, next) => {
   const { title, description, targetDate, progress, status } = req.body;
   if (!title) return res.status(400).json({ error: "Title is required" });
   try {
-    const [goal] = await db.insert(goalsTable).values({ title, description: description || "", targetDate: targetDate || "", progress: progress || 0, status: status || "active", userId: req.userId }).returning();
+    const [goal] = await db
+      .insert(goalsTable)
+      .values({
+        title,
+        description: description || "",
+        targetDate: targetDate || "",
+        progress: progress || 0,
+        status: status || "active",
+        userId: req.userId,
+      })
+      .returning();
     res.status(201).json(goal);
   } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    next(err);
   }
 });
 
-router.put("/goals/:id", requireAuth, async (req: any, res) => {
+router.put("/goals/:id", requireAuth, async (req: any, res, next) => {
   const id = parseInt(req.params.id);
   const { title, description, targetDate, progress, status } = req.body;
   try {
-    const [goal] = await db.update(goalsTable).set({ title, description, targetDate, progress, status, updatedAt: new Date() }).where(and(eq(goalsTable.id, id), eq(goalsTable.userId, req.userId))).returning();
-    if (!goal) return res.status(404).json({ error: "Not found" });
+    const [existing] = await db
+      .select()
+      .from(goalsTable)
+      .where(eq(goalsTable.id, id));
+
+    if (!existing) return res.status(404).json({ error: "Not found" });
+    if (existing.userId !== req.userId) return res.status(403).json({ error: "Forbidden" });
+
+    const [goal] = await db
+      .update(goalsTable)
+      .set({ title, description, targetDate, progress, status, updatedAt: new Date() })
+      .where(eq(goalsTable.id, id))
+      .returning();
     res.json(goal);
   } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    next(err);
   }
 });
 
-router.delete("/goals/:id", requireAuth, async (req: any, res) => {
+router.delete("/goals/:id", requireAuth, async (req: any, res, next) => {
   const id = parseInt(req.params.id);
   try {
-    await db.delete(goalsTable).where(and(eq(goalsTable.id, id), eq(goalsTable.userId, req.userId)));
+    const [existing] = await db
+      .select()
+      .from(goalsTable)
+      .where(eq(goalsTable.id, id));
+
+    if (!existing) return res.status(404).json({ error: "Not found" });
+    if (existing.userId !== req.userId) return res.status(403).json({ error: "Forbidden" });
+
+    await db.delete(goalsTable).where(eq(goalsTable.id, id));
     res.status(204).send();
   } catch (err) {
-    req.log.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    next(err);
   }
 });
 
