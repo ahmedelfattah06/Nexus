@@ -31,6 +31,11 @@ function requireAuth(req: any, res: any, next: any) {
   next();
 }
 
+async function hasAnyAdmin() {
+  const [row] = await db.select({ c: count() }).from(adminsTable);
+  return row.c > 0;
+}
+
 async function fetchClerkUsers(userIds: string[]): Promise<Record<string, any>> {
   const secretKey = process.env.CLERK_SECRET_KEY;
   if (!secretKey || userIds.length === 0) return {};
@@ -69,7 +74,8 @@ router.get("/admin/check", requireAuth, async (req: any, res, next) => {
       .from(adminsTable)
       .where(eq(adminsTable.userId, req.userId))
       .limit(1);
-    res.json({ isAdmin: !!admin });
+    const bootstrapEligible = !(await hasAnyAdmin());
+    res.json({ isAdmin: !!admin, bootstrapEligible });
   } catch (err) {
     next(err);
   }
@@ -77,8 +83,8 @@ router.get("/admin/check", requireAuth, async (req: any, res, next) => {
 
 router.post("/admin/seed", requireAuth, async (req: any, res, next) => {
   try {
-    const [existing] = await db.select({ c: count() }).from(adminsTable);
-    if (existing.c > 0) {
+    const existingAdmin = await hasAnyAdmin();
+    if (existingAdmin) {
       return res.status(403).json({ error: "Admin already exists. Contact an existing admin." });
     }
     const [admin] = await db
@@ -93,7 +99,6 @@ router.post("/admin/seed", requireAuth, async (req: any, res, next) => {
 
 router.get("/admin/stats", requireAdmin, async (_req, res, next) => {
   try {
-    const [users] = await db.select({ c: count() }).from(workspacesTable);
     const [wsCount] = await db.select({ c: count() }).from(workspacesTable);
     const [pageCount] = await db.select({ c: count() }).from(pagesTable);
     const [taskCount] = await db.select({ c: count() }).from(tasksTable);
@@ -162,14 +167,13 @@ router.get("/admin/users", requireAdmin, async (_req, res, next) => {
     const adminRows = await db.select({ userId: adminsTable.userId }).from(adminsTable);
     const adminSet = new Set(adminRows.map((a) => a.userId));
 
-    const [wsCounts] = await Promise.all([
-      db.select({ userId: workspacesTable.userId, c: count() })
-        .from(workspacesTable)
-        .groupBy(workspacesTable.userId),
-    ]);
+    const wsCounts = await db
+      .select({ userId: workspacesTable.userId, c: count() })
+      .from(workspacesTable)
+      .groupBy(workspacesTable.userId);
 
     const wsMap: Record<string, number> = {};
-    for (const row of wsCounts as any[]) wsMap[row.userId] = Number(row.c);
+    for (const row of wsCounts) wsMap[row.userId] = Number(row.c);
 
     const users = allUserIds.map((userId) => ({
       userId,

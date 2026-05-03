@@ -2,7 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import { getAuth } from "@clerk/express";
 import { db } from "@workspace/db";
 import { adminsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
+
+async function hasAnyAdmin() {
+  const [row] = await db.select({ c: count() }).from(adminsTable);
+  return row.c > 0;
+}
 
 export async function requireAdmin(req: Request, res: Response, next: NextFunction) {
   const auth = getAuth(req);
@@ -16,7 +21,9 @@ export async function requireAdmin(req: Request, res: Response, next: NextFuncti
       .where(eq(adminsTable.userId, userId))
       .limit(1);
 
-    if (!admin) return res.status(403).json({ error: "Forbidden: Admin access required" });
+    if (!admin && await hasAnyAdmin()) {
+      return res.status(403).json({ error: "Forbidden: Admin access required" });
+    }
 
     (req as any).userId = userId;
     next();
