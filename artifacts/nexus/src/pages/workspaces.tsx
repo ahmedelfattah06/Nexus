@@ -31,6 +31,7 @@ export default function WorkspacesPage() {
   const { toast } = useToast();
 
   const workspaces = useListWorkspaces();
+  const workspaceList: any[] = Array.isArray(workspaces.data) ? workspaces.data : (workspaces.data as any)?.data ?? [];
   const create = useCreateWorkspace();
   const remove = useDeleteWorkspace();
 
@@ -117,7 +118,7 @@ export default function WorkspacesPage() {
             <Card key={i}><CardContent className="pt-6"><Skeleton className="h-24 w-full" /></CardContent></Card>
           ))}
         </div>
-      ) : workspaces.data?.length === 0 ? (
+      ) : workspaceList.length === 0 ? (
         <div className="text-center py-20">
           <FolderOpen className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
           <h3 className="font-serif text-2xl mb-2">No workspaces yet</h3>
@@ -125,7 +126,7 @@ export default function WorkspacesPage() {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 gap-4">
-          {workspaces.data?.map((ws) => (
+          {workspaceList.map((ws) => (
             <Card
               key={ws.id}
               className="cursor-pointer hover:shadow-md transition-shadow group"

@@ -40,11 +40,20 @@ export default function NexPage() {
     },
   });
 
+  const convoList: any[] = Array.isArray(convos.data)
+    ? convos.data
+    : (convos.data as any)?.data ?? [];
+  const messageList: any[] = Array.isArray(convoMessages.data)
+    ? convoMessages.data
+    : (convoMessages.data as any)?.data ?? [];
+
   useEffect(() => {
-    if (convoMessages.data) {
-      setMessages(convoMessages.data.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })));
+    if (messageList.length > 0) {
+      setMessages(messageList.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })));
+    } else {
+      setMessages([]);
     }
-  }, [convoMessages.data]);
+  }, [messageList]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -146,10 +155,10 @@ export default function NexPage() {
             <div className="px-3 py-2 space-y-1">
               {Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-7 w-full" />)}
             </div>
-          ) : convos.data?.length === 0 ? (
+          ) : convoList.length === 0 ? (
             <p className="px-3 py-4 text-xs text-muted-foreground">No conversations yet</p>
           ) : (
-            convos.data?.map((convo) => (
+            convoList.map((convo) => (
               <div
                 key={convo.id}
                 className={cn(

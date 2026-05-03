@@ -17,13 +17,14 @@ function StudyMode({ setId, onClose }: { setId: number; onClose: () => void }) {
   const [idx, setIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
 
-  const current = cards.data?.[idx];
+  const cardList: any[] = Array.isArray(cards.data) ? cards.data : (cards.data as any)?.data ?? [];
+  const current = cardList[idx];
   if (cards.isLoading) return <div className="flex items-center justify-center h-64"><Skeleton className="w-full h-full" /></div>;
-  if (!cards.data?.length) return <div className="text-center py-10 text-muted-foreground">No cards in this set yet.</div>;
+  if (!cardList.length) return <div className="text-center py-10 text-muted-foreground">No cards in this set yet.</div>;
 
   return (
     <div className="space-y-6">
-      <div className="text-center text-sm text-muted-foreground">{idx + 1} / {cards.data.length}</div>
+      <div className="text-center text-sm text-muted-foreground">{idx + 1} / {cardList.length}</div>
       <div className="relative cursor-pointer" onClick={() => setFlipped(f => !f)} style={{ perspective: "1000px" }}>
         <div className={cn("relative w-full transition-all duration-500", flipped ? "[transform:rotateY(180deg)]"  : "")} style={{ transformStyle: "preserve-3d", minHeight: "200px" }}>
           <Card className="absolute inset-0 flex items-center justify-center p-8 text-center" style={{ backfaceVisibility: "hidden" }}>
@@ -48,7 +49,7 @@ function StudyMode({ setId, onClose }: { setId: number; onClose: () => void }) {
         <Button variant="outline" size="icon" onClick={() => { setIdx(0); setFlipped(false); }}>
           <RotateCcw className="w-4 h-4" />
         </Button>
-        <Button variant="outline" size="icon" onClick={() => { setIdx(i => Math.min(cards.data!.length - 1, i + 1)); setFlipped(false); }} disabled={idx === cards.data!.length - 1}>
+        <Button variant="outline" size="icon" onClick={() => { setIdx(i => Math.min(cardList.length - 1, i + 1)); setFlipped(false); }} disabled={idx === cardList.length - 1}>
           <ChevronRight className="w-4 h-4" />
         </Button>
       </div>
@@ -87,7 +88,7 @@ function SetView({ setId, onBack }: { setId: number; onBack: () => void }) {
         <>
           <div className="flex gap-2">
             <Button variant="outline" onClick={onBack}><ChevronLeft className="w-4 h-4 mr-1" /> Back</Button>
-            {cards.data && cards.data.length > 0 && (
+            {((Array.isArray(cards.data) ? cards.data : (cards.data as any)?.data ?? []) as any[]).length > 0 && (
               <Button onClick={() => setStudying(true)} className="ml-auto"><Brain className="w-4 h-4 mr-2" />{t.flashcards.study}</Button>
             )}
           </div>
@@ -102,7 +103,7 @@ function SetView({ setId, onBack }: { setId: number; onBack: () => void }) {
           </div>
           {cards.isLoading ? <Skeleton className="h-24 w-full" /> : (
             <div className="space-y-2">
-              {cards.data?.map(card => (
+              {((Array.isArray(cards.data) ? cards.data : (cards.data as any)?.data ?? []) as any[]).map(card => (
                 <Card key={card.id} className="group">
                   <CardContent className="pt-3 pb-3 flex gap-4 items-start">
                     <div className="flex-1 grid grid-cols-2 gap-4">
@@ -184,7 +185,7 @@ export default function FlashcardsPage() {
 
       {sets.isLoading ? (
         <div className="grid sm:grid-cols-2 gap-4">{Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)}</div>
-      ) : sets.data?.length === 0 ? (
+      ) : ((Array.isArray(sets.data) ? sets.data : (sets.data as any)?.data ?? []) as any[]).length === 0 ? (
         <div className="text-center py-20">
           <Brain className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
           <h3 className="font-serif text-2xl mb-2">{t.flashcards.empty}</h3>
@@ -192,7 +193,7 @@ export default function FlashcardsPage() {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 gap-4">
-          {sets.data?.map(set => (
+          {((Array.isArray(sets.data) ? sets.data : (sets.data as any)?.data ?? []) as any[]).map(set => (
             <Card key={set.id} className="cursor-pointer hover:shadow-md transition-shadow group" onClick={() => setActiveSet(set.id)}>
               <CardContent className="pt-5 pb-5">
                 <div className="flex items-start justify-between">

@@ -40,6 +40,7 @@ export default function PagesPage() {
   const createPage = useCreatePage();
   const updatePage = useUpdatePage();
   const deletePage = useDeletePage();
+  const pageList: any[] = Array.isArray(pages.data) ? pages.data : (pages.data as any)?.data ?? [];
 
   const [isDirty, setIsDirty] = useState(false);
 
@@ -151,10 +152,10 @@ export default function PagesPage() {
             <div className="px-3 py-2 space-y-1">
               {Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-7 w-full" />)}
             </div>
-          ) : pages.data?.length === 0 ? (
+          ) : pageList.length === 0 ? (
             <p className="px-3 py-4 text-xs text-muted-foreground">No pages yet</p>
           ) : (
-            pages.data?.map((page) => (
+            pageList.map((page) => (
               <div
                 key={page.id}
                 className={`group flex items-center gap-2 px-3 py-1.5 cursor-pointer text-sm transition-colors ${

@@ -37,6 +37,8 @@ export default function DashboardPage() {
   const recentPages = useGetRecentPages();
   const todayTasks = useGetTodayTasks();
   const dailyQuote = useGetDailyQuote();
+  const todayTaskList: any[] = Array.isArray(todayTasks.data) ? todayTasks.data : (todayTasks.data as any)?.data ?? [];
+  const recentPageList: any[] = Array.isArray(recentPages.data) ? recentPages.data : (recentPages.data as any)?.data ?? [];
 
   const firstName = user?.firstName || user?.username || "";
   const hour = new Date().getHours();
@@ -166,13 +168,13 @@ export default function DashboardPage() {
           <CardContent className="space-y-2">
             {todayTasks.isLoading ? (
               <Skeleton className="h-20 w-full" />
-            ) : todayTasks.data?.length === 0 ? (
+            ) : todayTaskList.length === 0 ? (
               <div className="text-center py-6">
                 <Zap className="w-8 h-8 text-primary mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">{t.dashboard.noRecentPages}</p>
               </div>
             ) : (
-              todayTasks.data?.map((task) => (
+              todayTaskList.map((task) => (
                 <div key={task.id} className="flex items-start gap-2 p-2 rounded-lg bg-muted/50" data-testid={`today-task-${task.id}`}>
                   <div className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />
                   <p className="text-sm leading-snug">{task.title}</p>
@@ -194,13 +196,13 @@ export default function DashboardPage() {
           <CardContent>
             {recentPages.isLoading ? (
               <Skeleton className="h-24 w-full" />
-            ) : recentPages.data?.length === 0 ? (
+            ) : recentPageList.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">
                 {t.dashboard.noRecentPages}
               </p>
             ) : (
               <div className="divide-y divide-border">
-                {recentPages.data?.map((page) => (
+                {recentPageList.map((page) => (
                   <div key={page.id} className="flex items-center justify-between py-3" data-testid={`recent-page-${page.id}`}>
                     <div>
                       <p className="text-sm font-medium">{page.title}</p>

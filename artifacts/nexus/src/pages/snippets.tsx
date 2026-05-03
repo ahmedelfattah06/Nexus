@@ -39,6 +39,7 @@ export default function SnippetsPage() {
   const snippets = useListSnippets();
   const create = useCreateSnippet();
   const remove = useDeleteSnippet();
+  const snippetList: any[] = Array.isArray(snippets.data) ? snippets.data : (snippets.data as any)?.data ?? [];
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<SnippetForm>({
     defaultValues: { language: "javascript", code: "", description: "" },
@@ -73,10 +74,10 @@ export default function SnippetsPage() {
     setTimeout(() => setCopied(null), 2000);
   }
 
-  const languages = ["all", ...Array.from(new Set(snippets.data?.map((s) => s.language) ?? []))];
+  const languages = ["all", ...Array.from(new Set(snippetList.map((s) => s.language) ?? []))];
   const filtered = filter === "all"
-    ? (snippets.data ?? [])
-    : (snippets.data ?? []).filter((s) => s.language === filter);
+    ? snippetList
+    : snippetList.filter((s) => s.language === filter);
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8">
