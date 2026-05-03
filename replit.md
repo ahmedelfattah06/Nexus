@@ -9,8 +9,8 @@ Full-stack Notion alternative for developers and students. Built as a pnpm monor
 ```
 artifacts/
   nexus/          — React+Vite frontend (port via $PORT, preview at /)
-  api-server/     — Express 5 REST API (port 8080, routed at /api)
-  mockup-sandbox/ — Component preview server (port 8081)
+  api-server/     — Express 5 REST API (port via $PORT, routed at /api)
+  mockup-sandbox/ — Component preview server
 lib/
   db/                         — Drizzle ORM schema + migrations
   api-spec/                   — OpenAPI spec (openapi.yaml) + Orval codegen
@@ -43,35 +43,29 @@ lib/
 - **Daily Cockpit** — dashboard with stats, streaks, daily AI quote, quick links
 - **Workspaces** — organize notes by project/topic
 - **Pages Editor** — rich text notes within workspaces
-- **Kanban Tasks** — per-workspace task boards with status columns
+- **Kanban Tasks** — per-workspace task boards with drag & drop
 - **Code Snippets** — personal snippet library with language filter
 - **Focus Mode** — Pomodoro timer with session recording
 - **Nex AI** — Claude-powered chat assistant with streaming SSE
 
-### Productivity (New)
+### Productivity
 - **Habit Tracker** — daily check-in, streaks, color/icon customization
 - **Goals** — title/description/date/progress/status tracking
 - **Mood Tracker** — 1–5 scale with notes and history
 - **Analytics** — weekly focus bar chart, session stats
 
-### Knowledge (New)
+### Knowledge
 - **Bookmarks** — save links with tags, favicon display, search
 - **Reading List** — want-to-read/reading/completed with progress slider
 - **Flashcards** — sets with card flip study mode
 
-## Key Schema Facts (ground truth for API/frontend)
+## Key Updates
 
-- `CreateWorkspaceBody`: `name`, `icon`, `color` — NO description
-- `CreateSnippetBody`: `language`, `code`, `description` — NO title (description is the label)
-- `CreateSessionBody`: `duration` (minutes int), `focusScore`, `tasksCompleted`, `date?` (ISO string)
-- `FocusSession.date`: `string` (ISO date-time) in TypeScript interface
-- `Workspace` type: no `description` field
-
-## Clerk API Notes (v6)
-
-- Use `Show when="signed-in"` / `Show when="signed-out"` (NOT `SignedIn`/`SignedOut` components)
-- `publishableKeyFromHost` from `@clerk/react/internal`
-- `UserButton` has no `afterSignOutUrl` prop — remove it
+- Ownership checks are enforced on user-owned resources.
+- List endpoints use paginated `{ data, pagination }` responses where applicable.
+- AI routes include rate limiting, quote caching, and SSE cleanup on disconnect.
+- Habit streaks are calculated from `habit_logs` and duplicate daily mood entries are blocked.
+- Database indexes and cascade deletes are in place for the main user-owned tables.
 
 ## Key Commands
 
